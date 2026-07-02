@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WH 家庭健康菜谱</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #fce4ec 0%, #e8f5e9 50%, #e3f2fd 100%);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  .header {
+    text-align: center;
+    padding: 20px 0 8px;
+  }
+
+  .header h1 {
+    font-size: 1.8em;
+    color: #37474f;
+    letter-spacing: 2px;
+  }
+
+  .header p {
+    color: #78909c;
+    font-size: 0.95em;
+    margin-top: 6px;
+  }
+
+  /* ---- 分类卡片 ---- */
+  .section {
+    max-width: 640px;
+    margin: 16px auto;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    font-size: 1.15em;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .section-header .emoji { font-size: 1.4em; }
+
+  .section-body {
+    padding: 12px 20px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* 标签样式 */
+  .item {
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .item:active { transform: scale(0.95); }
+
+  /* 选中状态 */
+  .item.selected {
+    opacity: 1;
+    box-shadow: 0 0 0 2px currentColor;
+    transform: scale(1.05);
+  }
+
+  .item.selected::after {
+    content: ' ✓';
+    font-size: 0.8em;
+  }
+
+  /* ---- 各分类配色 ---- */
+  /* 早饭 - 暖橙 */
+  .s-breakfast .section-header { background: linear-gradient(90deg, #ff9800, #ffb74d); }
+  .s-breakfast .item { background: #fff3e0; color: #e65100; }
+
+  /* 主食 - 紫罗兰 */
+  .s-staple .section-header { background: linear-gradient(90deg, #7e57c2, #b39ddb); }
+  .s-staple .item { background: #ede7f6; color: #4527a0; }
+
+  /* 主菜 - 深红 */
+  .s-dish .section-header { background: linear-gradient(90deg, #d32f2f, #ef5350); }
+  .s-dish .item { background: #ffebee; color: #b71c1c; }
+
+  /* 汤类 - 湖蓝 */
+  .s-soup .section-header { background: linear-gradient(90deg, #0288d1, #4fc3f7); }
+  .s-soup .item { background: #e1f5fe; color: #01579b; }
+
+  /* 水果 - 翠绿 */
+  .s-fruit .section-header { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
+  .s-fruit .item { background: #e8f5e9; color: #1b5e20; }
+
+  /* ---- 随机搭配按钮 ---- */
+  .random-wrap {
+    max-width: 640px;
+    margin: 28px auto 0;
+    text-align: center;
+  }
+
+  .random-btn {
+    background: linear-gradient(135deg, #6c5ce7, #0984e3);
+    color: #fff;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 30px;
+    font-size: 1.05em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(108,92,231,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .random-btn:hover  { transform: scale(1.04); box-shadow: 0 6px 22px rgba(108,92,231,0.4); }
+  .random-btn:active { transform: scale(0.97); }
+
+  /* 随机结果 */
+  .random-result {
+    max-width: 640px;
+    margin: 16px auto 0;
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    display: none;
+  }
+
+  .random-result.show { display: block; }
+
+  .random-result h3 {
+    text-align: center;
+    color: #6c5ce7;
+    margin-bottom: 14px;
+    font-size: 1.1em;
+  }
+
+  .rr-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed #eceff1;
+  }
+
+  .rr-row:last-child { border-bottom: none; }
+
+  .rr-label {
+    width: 70px;
+    font-size: 0.9em;
+    color: #78909c;
+    flex-shrink: 0;
+  }
+
+  .rr-value {
+    flex: 1;
+    font-weight: 600;
+    color: #37474f;
+    font-size: 0.95em;
+  }
+
+  /* ---- 点菜区域 ---- */
+  .order-panel {
+    max-width: 640px;
+    margin: 24px auto 80px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  .order-panel-header {
+    background: linear-gradient(90deg, #00897b, #4db6ac);
+    padding: 14px 20px;
+    font-size: 1.15em;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* 待选区 — 固定在底部 */
+  .order-staging-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
+    z-index: 999;
+    padding: 10px 16px 14px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+  }
+
+  .order-staging-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .staging-tag {
+    padding: 4px 12px;
+    border-radius: 14px;
+    font-size: 0.82em;
+    font-weight: 500;
+    background: #e0f2f1;
+    color: #00695c;
+  }
+
+  .order-staging-empty {
+    font-size: 0.82em;
+    color: #b0bec5;
+    font-style: italic;
+  }
+
+  /* 确认按钮 */
+  .order-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .order-confirm-btn {
+    background: linear-gradient(135deg, #00897b, #4db6ac);
+    color: #fff;
+    border: none;
+    padding: 10px 32px;
+    border-radius: 24px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0,137,123,0.3);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .order-confirm-btn:active { transform: scale(0.96); }
+
+  .order-clear-btn {
+    background: #eceff1;
+    color: #546e7a;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .order-clear-btn:active { transform: scale(0.96); }
+
+  /* 点菜清单 */
+  .order-history {
+    padding: 14px 20px 18px;
+  }
+
+  .order-day-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px dashed #eceff1;
+    font-size: 0.92em;
+  }
+
+  .order-day-row:last-child { border-bottom: none; }
+
+  .order-day-label {
+    width: 80px;
+    flex-shrink: 0;
+    font-weight: 600;
+    color: #00897b;
+    font-size: 0.88em;
+    padding-top: 2px;
+  }
+
+  .order-day-items {
+    flex: 1;
+    color: #37474f;
+    line-height: 1.6;
+  }
+
+  .order-day-empty {
+    color: #b0bec5;
+    font-style: italic;
+    font-size: 0.88em;
+  }
+
+  /* 移动端微调 */
+  @media (max-width: 480px) {
+    body { padding: 16px 10px 50px; }
+    .header h1 { font-size: 1.5em; }
+    .section { margin: 12px auto; }
+    .section-body { padding: 10px 14px 14px; gap: 8px; }
+    .item { padding: 6px 13px; font-size: 0.88em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 头部 -->
+<div class="header">
+  <h1>🍽️ WH 家庭健康菜谱</h1>
+  <p>每日饮食搭配，健康生活每一天</p>
+</div>
+
+<!-- 早饭 -->
+<div class="section s-breakfast">
+  <div class="section-header"><span class="emoji">🌅</span>早饭</div>
+  <div class="section-body" data-category="早饭">
+    <span class="item" onclick="toggleSelect(this)">燕麦牛奶</span>
+    <span class="item" onclick="toggleSelect(this)">水煮蛋</span>
+    <span class="item" onclick="toggleSelect(this)">蒸玉米</span>
+    <span class="item" onclick="toggleSelect(this)">小番茄</span>
+    <span class="item" onclick="toggleSelect(this)">小馒头</span>
+  </div>
+</div>
+
+<!-- 主食 -->
+<div class="section s-staple">
+  <div class="section-header"><span class="emoji">🍚</span>主食</div>
+  <div class="section-body" data-category="主食">
+    <span class="item" onclick="toggleSelect(this)">米饭</span>
+    <span class="item" onclick="toggleSelect(this)">紫薯饭</span>
+    <span class="item" onclick="toggleSelect(this)">杂粮饭</span>
+    <span class="item" onclick="toggleSelect(this)">米粉(可干拌)</span>
+    <span class="item" onclick="toggleSelect(this)">面条(干拌/汤底)</span>
+  </div>
+</div>
+
+<!-- 主菜 -->
+<div class="section s-dish">
+  <div class="section-header"><span class="emoji">🥘</span>主菜</div>
+  <div class="section-body" data-category="主菜">
+    <span class="item" onclick="toggleSelect(this)">清蒸鲈鱼</span>
+    <span class="item" onclick="toggleSelect(this)">辣炒鸭血</span>
+    <span class="item" onclick="toggleSelect(this)">红烧排骨</span>
+    <span class="item" onclick="toggleSelect(this)">红烧猪蹄</span>
+    <span class="item" onclick="toggleSelect(this)">小炒牛肉</span>
+    <span class="item" onclick="toggleSelect(this)">酸汤肥牛</span>
+    <span class="item" onclick="toggleSelect(this)">香干肉丝</span>
+    <span class="item" onclick="toggleSelect(this)">蒜苔肉丝</span>
+    <span class="item" onclick="toggleSelect(this)">苕皮回锅</span>
+    <span class="item" onclick="toggleSelect(this)">水煮肉片</span>
+    <span class="item" onclick="toggleSelect(this)">干锅肥肠</span>
+    <span class="item" onclick="toggleSelect(this)">肉末豇豆</span>
+    <span class="item" onclick="toggleSelect(this)">毛血旺</span>
+    <span class="item" onclick="toggleSelect(this)">鸡公煲</span>
+    <span class="item" onclick="toggleSelect(this)">白灼虾</span>
+    <span class="item" onclick="toggleSelect(this)">鸡蛋羹</span>
+    <span class="item" onclick="toggleSelect(this)">青花椒炒鸡</span>
+    <span class="item" onclick="toggleSelect(this)">清炒菠菜</span>
+    <span class="item" onclick="toggleSelect(this)">虾仁炒西兰花</span>
+    <span class="item" onclick="toggleSelect(this)">清炒胡萝卜丝</span>
+    <span class="item" onclick="toggleSelect(this)">酸辣土豆丝</span>
+    <span class="item" onclick="toggleSelect(this)">虾仁炒蛋</span>
+    <span class="item" onclick="toggleSelect(this)">韭黄炒蛋</span>
+  </div>
+</div>
+
+<!-- 汤类 -->
+<div class="section s-soup">
+  <div class="section-header"><span class="emoji">🍲</span>汤类</div>
+  <div class="section-body" data-category="汤类">
+    <span class="item" onclick="toggleSelect(this)">鲫鱼豆腐汤</span>
+    <span class="item" onclick="toggleSelect(this)">玉米排骨汤</span>
+    <span class="item" onclick="toggleSelect(this)">牛肉萝卜汤</span>
+    <span class="item" onclick="toggleSelect(this)">白菜豆腐汤</span>
+    <span class="item" onclick="toggleSelect(this)">冬瓜肉丸汤</span>
+    <span class="item" onclick="toggleSelect(this)">冬瓜牛肉汤</span>
+    <span class="item" onclick="toggleSelect(this)">番茄鸡蛋汤</span>
+    <span class="item" onclick="toggleSelect(this)">紫菜虾滑汤</span>
+  </div>
+</div>
+
+<!-- 水果 -->
+<div class="section s-fruit">
+  <div class="section-header"><span class="emoji">🍎</span>水果</div>
+  <div class="section-body" data-category="水果">
+    <span class="item" onclick="toggleSelect(this)">苹果</span>
+    <span class="item" onclick="toggleSelect(this)">香蕉</span>
+    <span class="item" onclick="toggleSelect(this)">坚果</span>
+    <span class="item" onclick="toggleSelect(this)">橘子</span>
+    <span class="item" onclick="toggleSelect(this)">蓝莓</span>
+    <span class="item" onclick="toggleSelect(this)">葡萄</span>
+    <span class="item" onclick="toggleSelect(this)">猕猴桃</span>
+  </div>
+</div>
+
+<!-- 随机搭配 -->
+<div class="random-wrap">
+  <button class="random-btn" onclick="randomMeal()">🎲 今天吃什么？</button>
+</div>
+<div class="random-result" id="result">
+  <h3>✨ 今日推荐搭配</h3>
+  <div id="resultBody"></div>
+</div>
+
+<!-- 点菜区域 — 清单历史 -->
+<div class="order-panel">
+  <div class="order-panel-header"><span class="emoji">📋</span>最近3天点菜记录</div>
+
+  <!-- 最近3天清单 -->
+  <div class="order-history" id="orderHistory">
+    <!-- 动态渲染 -->
+  </div>
+</div>
+
+<!-- 底部固定栏 — 待选区 + 按钮 -->
+<div class="order-staging-bar" id="stagingBar">
+  <div class="order-staging-items" id="stagingItems">
+    <span class="order-staging-empty">暂未选择菜品</span>
+  </div>
+  <div class="order-actions">
+    <button class="order-clear-btn" onclick="clearSelection()">清空</button>
+    <button class="order-confirm-btn" onclick="confirmOrder()">确认点菜</button>
+  </div>
+</div>
+
+<script>
+// ===== 点菜数据（自动同步到服务器） =====
+var orderData = {};
+
+var meals = {
+  '早饭': ['燕麦牛奶','水煮蛋','蒸玉米','小番茄','小馒头'],
+  '主食': ['米饭','紫薯饭','杂粮饭','米粉(可干拌)','面条(干拌/汤底)'],
+  '主菜': ['虾仁炒西兰花','清炒胡萝卜丝','虾仁炒蛋','清蒸鲈鱼','辣炒鸭血','清炒菠菜','红烧排骨','白灼虾','小炒牛肉','酸汤肥牛','鸡蛋羹','红烧猪蹄','毛血旺','鸡公煲','水煮肉片','苕皮回锅','香干肉丝','青花椒炒鸡','蒜苔肉丝','干锅肥肠','韭黄炒蛋','肉末豇豆'],
+  '汤类': ['鲫鱼豆腐汤','玉米排骨汤','牛肉萝卜汤','白菜豆腐汤','冬瓜肉丸汤','冬瓜牛肉汤','番茄鸡蛋汤','紫菜虾滑汤'],
+  '水果': ['苹果','香蕉','坚果','橘子','蓝莓','葡萄','猕猴桃']
+};
+
+/* ========== 随机搭配 ========== */
+function pick(arr, n) {
+  return arr.slice().sort(function(){ return Math.random()-0.5; }).slice(0, n);
+}
+
+function randomMeal() {
+  var result = document.getElementById('result');
+  var body   = document.getElementById('resultBody');
+  body.innerHTML = '';
+
+  var picks = {
+    '早饭': pick(meals['早饭'], 2),
+    '主食': pick(meals['主食'], 1),
+    '主菜': pick(meals['主菜'], 2),
+    '汤类': pick(meals['汤类'], 1),
+    '水果': pick(meals['水果'], 2)
+  };
+
+  for (var cat in picks) {
+    var row = document.createElement('div');
+    row.className = 'rr-row';
+    row.innerHTML = '<span class="rr-label">' + cat + '</span>'
+                  + '<span class="rr-value">' + picks[cat].join('、') + '</span>';
+    body.appendChild(row);
+  }
+
+  result.classList.add('show');
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ========== 点菜功能 ========== */
+// 待选菜篮子 { 类别: [菜名...] }
+var staging = {};
+
+// 点击菜品标签：选中/取消
+function toggleSelect(el) {
+  el.classList.toggle('selected');
+  refreshStaging();
+}
+
+// 刷新待选区显示
+function refreshStaging() {
+  // 收集所有选中项
+  staging = {};
+  var allSelected = document.querySelectorAll('.item.selected');
+  var container = document.getElementById('stagingItems');
+  container.innerHTML = '';
+
+  if (allSelected.length === 0) {
+    container.innerHTML = '<span class="order-staging-empty">暂未选择菜品</span>';
+    return;
+  }
+
+  for (var i = 0; i < allSelected.length; i++) {
+    var el = allSelected[i];
+    var cat = el.closest('.section-body').getAttribute('data-category');
+    var name = el.textContent.trim();
+    if (!staging[cat]) staging[cat] = [];
+    staging[cat].push(name);
+
+    var tag = document.createElement('span');
+    tag.className = 'staging-tag';
+    tag.textContent = cat + ': ' + name;
+    container.appendChild(tag);
+  }
+}
+
+// 清空选择
+function clearSelection() {
+  var all = document.querySelectorAll('.item.selected');
+  for (var i = 0; i < all.length; i++) {
+    all[i].classList.remove('selected');
+  }
+  refreshStaging();
+}
+
+// 获取日期键 (YYYY-MM-DD)
+function dateKey(offsetDays) {
+  var d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  var y = d.getFullYear();
+  var m = ('0' + (d.getMonth() + 1)).slice(-2);
+  var day = ('0' + d.getDate()).slice(-2);
+  return y + '-' + m + '-' + day;
+}
+
+// 获取日期显示标签
+function dateLabel(offsetDays) {
+  if (offsetDays === 0) return '今天';
+  if (offsetDays === -1) return '昨天';
+  if (offsetDays === -2) return '前天';
+  var d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return (d.getMonth() + 1) + '/' + d.getDate();
+}
+
+// 从服务器读取点菜记录
+function getOrders() {
+  return orderData;
+}
+
+// 从服务器加载数据
+function loadFromServer() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/api/orders', true);
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      try {
+        orderData = JSON.parse(xhr.responseText);
+      } catch(e) {}
+    }
+    renderOrderHistory();
+  };
+  xhr.onerror = function() {
+    renderOrderHistory();
+  };
+  xhr.send();
+}
+
+// 页面加载时读取服务器数据并渲染
+loadFromServer();
+
+// 保存数据到服务器
+function saveToServer() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/orders', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.send(JSON.stringify(orderData));
+}
+
+// 确认点菜
+function confirmOrder() {
+  if (Object.keys(staging).length === 0) {
+    alert('请先选择菜品！');
+    return;
+  }
+
+  var today = dateKey(0);
+  orderData[today] = JSON.parse(JSON.stringify(staging));
+
+  // 只保留最近3天
+  var keys = Object.keys(orderData);
+  keys.sort();
+  while (keys.length > 3) {
+    delete orderData[keys.shift()];
+  }
+
+  // 清空选择
+  clearSelection();
+
+  // 刷新清单
+  renderOrderHistory();
+
+  // 保存到服务器
+  saveToServer();
+
+  alert('已保存！数据已自动同步。');
+}
+
+// 渲染最近3天清单
+function renderOrderHistory() {
+  var orders = getOrders();
+  var container = document.getElementById('orderHistory');
+  container.innerHTML = '';
+
+  for (var i = 0; i <= 2; i++) {
+    var key = dateKey(-i);
+    var label = dateLabel(-i);
+    var dayOrder = orders[key];
+
+    var row = document.createElement('div');
+    row.className = 'order-day-row';
+
+    var labelDiv = document.createElement('div');
+    labelDiv.className = 'order-day-label';
+    labelDiv.textContent = label;
+
+    var itemsDiv = document.createElement('div');
+    itemsDiv.className = 'order-day-items';
+
+    if (dayOrder && Object.keys(dayOrder).length > 0) {
+      var parts = [];
+      var catOrder = ['早饭', '主食', '主菜', '汤类', '水果'];
+      for (var c = 0; c < catOrder.length; c++) {
+        var cat = catOrder[c];
+        if (dayOrder[cat] && dayOrder[cat].length > 0) {
+          parts.push('<b>' + cat + '</b>：' + dayOrder[cat].join('、'));
+        }
+      }
+      // 显示其他未列出的类别
+      for (var cat2 in dayOrder) {
+        if (catOrder.indexOf(cat2) === -1 && dayOrder[cat2].length > 0) {
+          parts.push('<b>' + cat2 + '</b>：' + dayOrder[cat2].join('、'));
+        }
+      }
+      itemsDiv.innerHTML = parts.join('； ');
+    } else {
+      itemsDiv.innerHTML = '<span class="order-day-empty">未点菜</span>';
+    }
+
+    row.appendChild(labelDiv);
+    row.appendChild(itemsDiv);
+    container.appendChild(row);
+  }
+}
+
+// 页面加载时先读取服务器数据再渲染
+loadFromServer();
+renderOrderHistory();
+</script>
+
+</body>
+</html>
