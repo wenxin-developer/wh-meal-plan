@@ -860,12 +860,16 @@ function fixViewportHeight() {
   document.documentElement.style.setProperty('--vh', vh + 'px');
   document.body.style.height = vh + 'px';
   
-  // 检测微信内置浏览器（有固定的底部工具栏）
-  var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+  // 检测 iOS Safari 底部工具栏（后退/前进按钮）
+  // 如果 outerHeight 比 innerHeight 大很多，说明有工具栏
+  var toolbarHeight = window.outerHeight - window.innerHeight;
   var stagingBar = document.getElementById('stagingBar');
-  if (stagingBar && isWeChat) {
-    // 微信浏览器底部工具栏大约 44px
-    stagingBar.style.paddingBottom = '58px';
+  if (stagingBar && toolbarHeight > 30) {
+    // 有工具栏，给底栏加额外 padding
+    stagingBar.style.paddingBottom = (14 + toolbarHeight) + 'px';
+  } else if (stagingBar) {
+    // 没有工具栏，恢复正常 padding
+    stagingBar.style.paddingBottom = '';
   }
 }
 fixViewportHeight();
