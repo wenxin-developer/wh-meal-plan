@@ -671,14 +671,16 @@
     display: flex;
     gap: 8px;
     margin-bottom: 8px;
+    align-items: center;
   }
 
   .add-user-row input {
     flex: 1;
-    padding: 8px 12px;
+    min-width: 0;
+    padding: 10px 14px;
     border: 1.5px solid #cfd8dc;
     border-radius: 10px;
-    font-size: 0.9em;
+    font-size: 0.92em;
     outline: none;
     background: #fafafa;
   }
@@ -686,15 +688,18 @@
   .add-user-row input:focus { border-color: #6c5ce7; }
 
   .add-user-row select {
-    padding: 8px 10px;
+    flex: 0 0 auto;
+    width: 100px;
+    padding: 10px 10px;
     border: 1.5px solid #cfd8dc;
     border-radius: 10px;
-    font-size: 0.9em;
+    font-size: 0.92em;
     outline: none;
     background: #fafafa;
     -webkit-appearance: none;
     appearance: none;
-    min-width: 80px;
+    text-align: center;
+    text-align-last: center;
   }
 
   .add-user-submit {
