@@ -326,8 +326,6 @@
     z-index: 999;
     padding: 10px 16px 14px;
     padding-bottom: max(14px, env(safe-area-inset-bottom));
-    transform: translateZ(0); /* GPU 加速，避免重排 */
-    will-change: transform;
   }
 
   .order-staging-items {
@@ -742,8 +740,7 @@
 </style>
 <script>
   // 立即设置视口高度，避免首次渲染闪烁
-  var vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-  document.documentElement.style.setProperty('--vh', vh + 'px');
+  document.documentElement.style.setProperty('--vh', window.innerHeight + 'px');
 </script>
 </head>
 <body>
@@ -851,28 +848,13 @@
 <script>
 // ===== 修复移动端视口高度（解决浏览器导航栏导致的底栏抖动） =====
 function fixViewportHeight() {
-  var vh;
-  if (window.visualViewport) {
-    vh = window.visualViewport.height;
-  } else {
-    vh = window.innerHeight;
-  }
+  var vh = window.innerHeight;
   document.documentElement.style.setProperty('--vh', vh + 'px');
   document.body.style.height = vh + 'px';
 }
 fixViewportHeight();
-
-// 用 visualViewport 监听（iOS Safari 最准确）
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', fixViewportHeight);
-  window.visualViewport.addEventListener('scroll', fixViewportHeight);
-}
 window.addEventListener('resize', fixViewportHeight);
 window.addEventListener('orientationchange', function() {
-  setTimeout(fixViewportHeight, 150);
-});
-// 页面加载完成后再次修正
-window.addEventListener('load', function() {
   setTimeout(fixViewportHeight, 100);
 });
 
