@@ -104,16 +104,16 @@
 
   .section-body {
     padding: 12px 20px 18px;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
   }
 
   /* 标签样式 */
   .item {
-    padding: 7px 16px;
+    padding: 8px 4px;
     border-radius: 20px;
-    font-size: 0.95em;
+    font-size: 0.92em;
     font-weight: 500;
     cursor: pointer;
     transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
@@ -121,6 +121,10 @@
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     position: relative;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .item:active { transform: scale(0.95); }
@@ -465,8 +469,8 @@
     body { padding: 16px 10px 50px; }
     .header h1 { font-size: 1.5em; }
     .section { margin: 12px auto; }
-    .section-body { padding: 10px 14px 14px; gap: 8px; }
-    .item { padding: 6px 13px; font-size: 0.88em; }
+    .section-body { padding: 10px 14px 14px; gap: 8px; grid-template-columns: repeat(3, 1fr); }
+    .item { padding: 7px 2px; font-size: 0.85em; }
   }
 </style>
 </head>
