@@ -10,8 +10,20 @@
   body {
     font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
     background: linear-gradient(135deg, #fce4ec 0%, #e8f5e9 50%, #e3f2fd 100%);
-    min-height: 100vh;
-    padding: 24px 16px 140px;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .page-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 24px 16px 24px;
+    max-width: 680px;
+    width: 100%;
+    margin: 0 auto;
   }
 
   .header {
@@ -305,12 +317,9 @@
     font-size: 0.95em;
   }
 
-  /* 待选区 — 固定在底部 */
+  /* 待选区 — 固定在底部（flex 子元素） */
   .order-staging-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    flex-shrink: 0;
     background: #fff;
     box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
     z-index: 999;
@@ -718,7 +727,7 @@
 
   /* 移动端微调 */
   @media (max-width: 480px) {
-    body { padding: 16px 10px 130px; }
+    .page-scroll { padding: 16px 10px 16px; }
     .header h1 { font-size: 1.5em; }
     .section { margin: 12px auto; }
     .section-body { padding: 10px 14px 14px; gap: 8px; grid-template-columns: repeat(3, 1fr); }
@@ -730,6 +739,9 @@
 </style>
 </head>
 <body>
+
+<!-- 可滚动区域 -->
+<div class="page-scroll">
 
 <!-- 头部 -->
 <div class="header">
@@ -768,6 +780,8 @@
   <h3>✨ 今日推荐搭配</h3>
   <div id="resultBody"></div>
 </div>
+
+</div><!-- /.page-scroll -->
 
 <!-- 底部固定栏 — 待选区 + 按钮 -->
 <div class="order-staging-bar" id="stagingBar">
