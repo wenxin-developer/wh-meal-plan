@@ -31,6 +31,29 @@
     margin-top: 6px;
   }
 
+  /* 管理按钮 */
+  .manage-bar {
+    max-width: 640px;
+    margin: 12px auto;
+    text-align: right;
+  }
+
+  .manage-btn {
+    background: #eceff1;
+    color: #546e7a;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 0.88em;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .manage-btn:active { transform: scale(0.96); }
+  .manage-btn.active { background: #ff7043; color: #fff; }
+
   /* ---- 分类卡片 ---- */
   .section {
     max-width: 640px;
@@ -71,6 +94,7 @@
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    position: relative;
   }
 
   .item:active { transform: scale(0.95); }
@@ -87,24 +111,40 @@
     font-size: 0.8em;
   }
 
+  /* 编辑模式下的删除按钮 */
+  .item .delete-x {
+    display: none;
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    background: #ef5350;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    font-weight: bold;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  body.edit-mode .item .delete-x { display: block; }
+  body.edit-mode .item { padding-right: 20px; }
+
   /* ---- 各分类配色 ---- */
-  /* 早饭 - 暖橙 */
   .s-breakfast .section-header { background: linear-gradient(90deg, #ff9800, #ffb74d); }
   .s-breakfast .item { background: #fff3e0; color: #e65100; }
 
-  /* 主食 - 紫罗兰 */
   .s-staple .section-header { background: linear-gradient(90deg, #7e57c2, #b39ddb); }
   .s-staple .item { background: #ede7f6; color: #4527a0; }
 
-  /* 主菜 - 深红 */
   .s-dish .section-header { background: linear-gradient(90deg, #d32f2f, #ef5350); }
   .s-dish .item { background: #ffebee; color: #b71c1c; }
 
-  /* 汤类 - 湖蓝 */
   .s-soup .section-header { background: linear-gradient(90deg, #0288d1, #4fc3f7); }
   .s-soup .item { background: #e1f5fe; color: #01579b; }
 
-  /* 水果 - 翠绿 */
   .s-fruit .section-header { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
   .s-fruit .item { background: #e8f5e9; color: #1b5e20; }
 
@@ -307,6 +347,119 @@
     font-size: 0.88em;
   }
 
+  /* ---- 添加菜品弹窗 ---- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 360px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+
+  .modal-box h3 {
+    margin-bottom: 16px;
+    color: #37474f;
+    font-size: 1.1em;
+    text-align: center;
+  }
+
+  .modal-box label {
+    display: block;
+    font-size: 0.9em;
+    color: #546e7a;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .modal-box select,
+  .modal-box input[type="text"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #cfd8dc;
+    border-radius: 10px;
+    font-size: 1em;
+    margin-bottom: 14px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #fafafa;
+  }
+
+  .modal-box select {
+    background: #fafafa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2378909c' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center;
+    padding-right: 36px;
+  }
+
+  .modal-box select:focus,
+  .modal-box input[type="text"]:focus {
+    border-color: #6c5ce7;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .modal-actions button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .modal-cancel {
+    background: #eceff1;
+    color: #546e7a;
+  }
+
+  .modal-confirm {
+    background: linear-gradient(135deg, #6c5ce7, #0984e3);
+    color: #fff;
+  }
+
+  /* 添加菜品按钮（编辑模式下显示） */
+  .add-dish-btn {
+    display: none;
+    max-width: 640px;
+    margin: 12px auto;
+    text-align: center;
+  }
+
+  body.edit-mode .add-dish-btn { display: block; }
+
+  .add-dish-btn button {
+    background: linear-gradient(135deg, #66bb6a, #43a047);
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(67,160,71,0.3);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .add-dish-btn button:active { transform: scale(0.96); }
+
   /* 移动端微调 */
   @media (max-width: 480px) {
     body { padding: 16px 10px 50px; }
@@ -325,88 +478,18 @@
   <p>每日饮食搭配，健康生活每一天</p>
 </div>
 
-<!-- 早饭 -->
-<div class="section s-breakfast">
-  <div class="section-header"><span class="emoji">🌅</span>早饭</div>
-  <div class="section-body" data-category="早饭">
-    <span class="item" onclick="toggleSelect(this)">燕麦牛奶</span>
-    <span class="item" onclick="toggleSelect(this)">水煮蛋</span>
-    <span class="item" onclick="toggleSelect(this)">蒸玉米</span>
-    <span class="item" onclick="toggleSelect(this)">小番茄</span>
-    <span class="item" onclick="toggleSelect(this)">小馒头</span>
-  </div>
+<!-- 管理按钮 -->
+<div class="manage-bar">
+  <button class="manage-btn" id="manageBtn" onclick="toggleEditMode()">⚙️ 管理菜品</button>
 </div>
 
-<!-- 主食 -->
-<div class="section s-staple">
-  <div class="section-header"><span class="emoji">🍚</span>主食</div>
-  <div class="section-body" data-category="主食">
-    <span class="item" onclick="toggleSelect(this)">米饭</span>
-    <span class="item" onclick="toggleSelect(this)">紫薯饭</span>
-    <span class="item" onclick="toggleSelect(this)">杂粮饭</span>
-    <span class="item" onclick="toggleSelect(this)">米粉(可干拌)</span>
-    <span class="item" onclick="toggleSelect(this)">面条(干拌/汤底)</span>
-  </div>
+<!-- 添加菜品按钮（编辑模式下显示） -->
+<div class="add-dish-btn">
+  <button onclick="showAddModal()">＋ 添加菜品</button>
 </div>
 
-<!-- 主菜 -->
-<div class="section s-dish">
-  <div class="section-header"><span class="emoji">🥘</span>主菜</div>
-  <div class="section-body" data-category="主菜">
-    <span class="item" onclick="toggleSelect(this)">清蒸鲈鱼</span>
-    <span class="item" onclick="toggleSelect(this)">辣炒鸭血</span>
-    <span class="item" onclick="toggleSelect(this)">红烧排骨</span>
-    <span class="item" onclick="toggleSelect(this)">红烧猪蹄</span>
-    <span class="item" onclick="toggleSelect(this)">小炒牛肉</span>
-    <span class="item" onclick="toggleSelect(this)">酸汤肥牛</span>
-    <span class="item" onclick="toggleSelect(this)">香干肉丝</span>
-    <span class="item" onclick="toggleSelect(this)">蒜苔肉丝</span>
-    <span class="item" onclick="toggleSelect(this)">苕皮回锅</span>
-    <span class="item" onclick="toggleSelect(this)">水煮肉片</span>
-    <span class="item" onclick="toggleSelect(this)">干锅肥肠</span>
-    <span class="item" onclick="toggleSelect(this)">肉末豇豆</span>
-    <span class="item" onclick="toggleSelect(this)">毛血旺</span>
-    <span class="item" onclick="toggleSelect(this)">鸡公煲</span>
-    <span class="item" onclick="toggleSelect(this)">白灼虾</span>
-    <span class="item" onclick="toggleSelect(this)">鸡蛋羹</span>
-    <span class="item" onclick="toggleSelect(this)">青花椒炒鸡</span>
-    <span class="item" onclick="toggleSelect(this)">清炒菠菜</span>
-    <span class="item" onclick="toggleSelect(this)">虾仁炒西兰花</span>
-    <span class="item" onclick="toggleSelect(this)">清炒胡萝卜丝</span>
-    <span class="item" onclick="toggleSelect(this)">酸辣土豆丝</span>
-    <span class="item" onclick="toggleSelect(this)">虾仁炒蛋</span>
-    <span class="item" onclick="toggleSelect(this)">韭黄炒蛋</span>
-  </div>
-</div>
-
-<!-- 汤类 -->
-<div class="section s-soup">
-  <div class="section-header"><span class="emoji">🍲</span>汤类</div>
-  <div class="section-body" data-category="汤类">
-    <span class="item" onclick="toggleSelect(this)">鲫鱼豆腐汤</span>
-    <span class="item" onclick="toggleSelect(this)">玉米排骨汤</span>
-    <span class="item" onclick="toggleSelect(this)">牛肉萝卜汤</span>
-    <span class="item" onclick="toggleSelect(this)">白菜豆腐汤</span>
-    <span class="item" onclick="toggleSelect(this)">冬瓜肉丸汤</span>
-    <span class="item" onclick="toggleSelect(this)">冬瓜牛肉汤</span>
-    <span class="item" onclick="toggleSelect(this)">番茄鸡蛋汤</span>
-    <span class="item" onclick="toggleSelect(this)">紫菜虾滑汤</span>
-  </div>
-</div>
-
-<!-- 水果 -->
-<div class="section s-fruit">
-  <div class="section-header"><span class="emoji">🍎</span>水果</div>
-  <div class="section-body" data-category="水果">
-    <span class="item" onclick="toggleSelect(this)">苹果</span>
-    <span class="item" onclick="toggleSelect(this)">香蕉</span>
-    <span class="item" onclick="toggleSelect(this)">坚果</span>
-    <span class="item" onclick="toggleSelect(this)">橘子</span>
-    <span class="item" onclick="toggleSelect(this)">蓝莓</span>
-    <span class="item" onclick="toggleSelect(this)">葡萄</span>
-    <span class="item" onclick="toggleSelect(this)">猕猴桃</span>
-  </div>
-</div>
+<!-- 菜品区域（动态渲染） -->
+<div id="menuContainer"></div>
 
 <!-- 随机搭配 -->
 <div class="random-wrap">
@@ -420,11 +503,7 @@
 <!-- 点菜区域 — 清单历史 -->
 <div class="order-panel">
   <div class="order-panel-header"><span class="emoji">📋</span>最近3天点菜记录</div>
-
-  <!-- 最近3天清单 -->
-  <div class="order-history" id="orderHistory">
-    <!-- 动态渲染 -->
-  </div>
+  <div class="order-history" id="orderHistory"></div>
 </div>
 
 <!-- 底部固定栏 — 待选区 + 按钮 -->
@@ -438,19 +517,206 @@
   </div>
 </div>
 
-<script>
-// ===== 点菜数据（自动同步到服务器） =====
-var orderData = {};
+<!-- 添加菜品弹窗 -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box">
+    <h3>添加新菜品</h3>
+    <label>选择分类</label>
+    <select id="addCategory">
+      <option value="早饭">🌅 早饭</option>
+      <option value="主食">🍚 主食</option>
+      <option value="主菜">🥘 主菜</option>
+      <option value="汤类">🍲 汤类</option>
+      <option value="水果">🍎 水果</option>
+    </select>
+    <label>菜品名称</label>
+    <input type="text" id="addDishName" placeholder="例如：小米粥" maxlength="20">
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="hideAddModal()">取消</button>
+      <button class="modal-confirm" onclick="confirmAddDish()">添加</button>
+    </div>
+  </div>
+</div>
 
-var meals = {
+<script>
+// ===== 分类配置 =====
+var categoryConfig = {
+  '早饭': { emoji: '🌅', cssClass: 's-breakfast' },
+  '主食': { emoji: '🍚', cssClass: 's-staple' },
+  '主菜': { emoji: '🥘', cssClass: 's-dish' },
+  '汤类': { emoji: '🍲', cssClass: 's-soup' },
+  '水果': { emoji: '🍎', cssClass: 's-fruit' }
+};
+
+var categoryOrder = ['早饭', '主食', '主菜', '汤类', '水果'];
+
+// ===== 默认菜品（首次初始化用） =====
+var defaultMeals = {
   '早饭': ['燕麦牛奶','水煮蛋','蒸玉米','小番茄','小馒头'],
   '主食': ['米饭','紫薯饭','杂粮饭','米粉(可干拌)','面条(干拌/汤底)'],
-  '主菜': ['虾仁炒西兰花','清炒胡萝卜丝','虾仁炒蛋','清蒸鲈鱼','辣炒鸭血','清炒菠菜','红烧排骨','白灼虾','小炒牛肉','酸汤肥牛','鸡蛋羹','红烧猪蹄','毛血旺','鸡公煲','水煮肉片','苕皮回锅','香干肉丝','青花椒炒鸡','蒜苔肉丝','干锅肥肠','韭黄炒蛋','肉末豇豆'],
+  '主菜': ['清蒸鲈鱼','辣炒鸭血','红烧排骨','红烧猪蹄','小炒牛肉','酸汤肥牛','香干肉丝','蒜苔肉丝','苕皮回锅','水煮肉片','干锅肥肠','肉末豇豆','毛血旺','鸡公煲','白灼虾','鸡蛋羹','青花椒炒鸡','清炒菠菜','虾仁炒西兰花','清炒胡萝卜丝','酸辣土豆丝','虾仁炒蛋','韭黄炒蛋'],
   '汤类': ['鲫鱼豆腐汤','玉米排骨汤','牛肉萝卜汤','白菜豆腐汤','冬瓜肉丸汤','冬瓜牛肉汤','番茄鸡蛋汤','紫菜虾滑汤'],
   '水果': ['苹果','香蕉','坚果','橘子','蓝莓','葡萄','猕猴桃']
 };
 
+// ===== 菜品数据（从服务器加载） =====
+var meals = {};
+var editMode = false;
+
+// ===== 点菜数据 =====
+var orderData = {};
+var staging = {};
+
+/* ========== 菜单加载与渲染 ========== */
+
+// 从服务器加载菜单
+function loadMenu() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/api/menu', true);
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      try {
+        var data = JSON.parse(xhr.responseText);
+        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+          meals = data;
+        } else {
+          // KV 为空，使用默认数据并保存
+          meals = JSON.parse(JSON.stringify(defaultMeals));
+          saveMenu();
+        }
+      } catch(e) {
+        meals = JSON.parse(JSON.stringify(defaultMeals));
+        saveMenu();
+      }
+    } else {
+      meals = JSON.parse(JSON.stringify(defaultMeals));
+    }
+    renderMenu();
+  };
+  xhr.onerror = function() {
+    meals = JSON.parse(JSON.stringify(defaultMeals));
+    renderMenu();
+  };
+  xhr.send();
+}
+
+// 保存菜单到服务器
+function saveMenu() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/menu', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.send(JSON.stringify(meals));
+}
+
+// 渲染菜单到页面
+function renderMenu() {
+  var container = document.getElementById('menuContainer');
+  container.innerHTML = '';
+
+  for (var i = 0; i < categoryOrder.length; i++) {
+    var cat = categoryOrder[i];
+    var config = categoryConfig[cat];
+    var items = meals[cat] || [];
+
+    var section = document.createElement('div');
+    section.className = 'section ' + config.cssClass;
+
+    var header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = '<span class="emoji">' + config.emoji + '</span>' + cat;
+    section.appendChild(header);
+
+    var body = document.createElement('div');
+    body.className = 'section-body';
+    body.setAttribute('data-category', cat);
+
+    for (var j = 0; j < items.length; j++) {
+      var item = document.createElement('span');
+      item.className = 'item';
+      item.setAttribute('onclick', 'toggleSelect(this)');
+      item.textContent = items[j];
+
+      // 删除按钮
+      var delBtn = document.createElement('span');
+      delBtn.className = 'delete-x';
+      delBtn.textContent = '×';
+      delBtn.setAttribute('onclick', 'deleteDish(event, "' + cat + '", ' + j + ')');
+      item.appendChild(delBtn);
+
+      body.appendChild(item);
+    }
+
+    section.appendChild(body);
+    container.appendChild(section);
+  }
+}
+
+/* ========== 编辑模式 ========== */
+
+function toggleEditMode() {
+  editMode = !editMode;
+  var btn = document.getElementById('manageBtn');
+  if (editMode) {
+    document.body.classList.add('edit-mode');
+    btn.classList.add('active');
+    btn.textContent = '✓ 完成管理';
+    // 退出编辑模式时清除选中状态
+    clearSelection();
+  } else {
+    document.body.classList.remove('edit-mode');
+    btn.classList.remove('active');
+    btn.textContent = '⚙️ 管理菜品';
+  }
+}
+
+/* ========== 添加菜品 ========== */
+
+function showAddModal() {
+  document.getElementById('addModal').classList.add('show');
+  document.getElementById('addDishName').value = '';
+  document.getElementById('addDishName').focus();
+}
+
+function hideAddModal() {
+  document.getElementById('addModal').classList.remove('show');
+}
+
+function confirmAddDish() {
+  var cat = document.getElementById('addCategory').value;
+  var name = document.getElementById('addDishName').value.trim();
+
+  if (!name) {
+    alert('请输入菜品名称！');
+    return;
+  }
+
+  // 检查是否已存在
+  if (!meals[cat]) meals[cat] = [];
+  if (meals[cat].indexOf(name) !== -1) {
+    alert('该分类下已有同名菜品！');
+    return;
+  }
+
+  meals[cat].push(name);
+  saveMenu();
+  renderMenu();
+  hideAddModal();
+}
+
+/* ========== 删除菜品 ========== */
+
+function deleteDish(event, cat, index) {
+  event.stopPropagation();
+  var name = meals[cat][index];
+  if (confirm('确定删除「' + name + '」吗？')) {
+    meals[cat].splice(index, 1);
+    saveMenu();
+    renderMenu();
+  }
+}
+
 /* ========== 随机搭配 ========== */
+
 function pick(arr, n) {
   return arr.slice().sort(function(){ return Math.random()-0.5; }).slice(0, n);
 }
@@ -460,13 +726,16 @@ function randomMeal() {
   var body   = document.getElementById('resultBody');
   body.innerHTML = '';
 
-  var picks = {
-    '早饭': pick(meals['早饭'], 2),
-    '主食': pick(meals['主食'], 1),
-    '主菜': pick(meals['主菜'], 2),
-    '汤类': pick(meals['汤类'], 1),
-    '水果': pick(meals['水果'], 2)
-  };
+  var picks = {};
+  var pickCounts = { '早饭': 2, '主食': 1, '主菜': 2, '汤类': 1, '水果': 2 };
+
+  for (var i = 0; i < categoryOrder.length; i++) {
+    var cat = categoryOrder[i];
+    var items = meals[cat] || [];
+    if (items.length > 0) {
+      picks[cat] = pick(items, Math.min(pickCounts[cat], items.length));
+    }
+  }
 
   for (var cat in picks) {
     var row = document.createElement('div');
@@ -481,18 +750,15 @@ function randomMeal() {
 }
 
 /* ========== 点菜功能 ========== */
-// 待选菜篮子 { 类别: [菜名...] }
-var staging = {};
 
-// 点击菜品标签：选中/取消
 function toggleSelect(el) {
+  // 编辑模式下不响应选中
+  if (editMode) return;
   el.classList.toggle('selected');
   refreshStaging();
 }
 
-// 刷新待选区显示
 function refreshStaging() {
-  // 收集所有选中项
   staging = {};
   var allSelected = document.querySelectorAll('.item.selected');
   var container = document.getElementById('stagingItems');
@@ -506,7 +772,14 @@ function refreshStaging() {
   for (var i = 0; i < allSelected.length; i++) {
     var el = allSelected[i];
     var cat = el.closest('.section-body').getAttribute('data-category');
-    var name = el.textContent.trim();
+    // 去掉删除按钮的文字
+    var name = '';
+    for (var k = 0; k < el.childNodes.length; k++) {
+      if (el.childNodes[k].nodeType === 3) {
+        name += el.childNodes[k].textContent;
+      }
+    }
+    name = name.trim();
     if (!staging[cat]) staging[cat] = [];
     staging[cat].push(name);
 
@@ -517,7 +790,6 @@ function refreshStaging() {
   }
 }
 
-// 清空选择
 function clearSelection() {
   var all = document.querySelectorAll('.item.selected');
   for (var i = 0; i < all.length; i++) {
@@ -526,7 +798,8 @@ function clearSelection() {
   refreshStaging();
 }
 
-// 获取日期键 (YYYY-MM-DD)
+/* ========== 点菜记录 ========== */
+
 function dateKey(offsetDays) {
   var d = new Date();
   d.setDate(d.getDate() + offsetDays);
@@ -536,7 +809,6 @@ function dateKey(offsetDays) {
   return y + '-' + m + '-' + day;
 }
 
-// 获取日期显示标签
 function dateLabel(offsetDays) {
   if (offsetDays === 0) return '今天';
   if (offsetDays === -1) return '昨天';
@@ -546,12 +818,6 @@ function dateLabel(offsetDays) {
   return (d.getMonth() + 1) + '/' + d.getDate();
 }
 
-// 从服务器读取点菜记录
-function getOrders() {
-  return orderData;
-}
-
-// 从服务器加载数据
 function loadFromServer() {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', '/api/orders', true);
@@ -569,10 +835,6 @@ function loadFromServer() {
   xhr.send();
 }
 
-// 页面加载时读取服务器数据并渲染
-loadFromServer();
-
-// 保存数据到服务器
 function saveToServer() {
   var xhr = new XMLHttpRequest();
   xhr.open('POST', '/api/orders', true);
@@ -580,7 +842,6 @@ function saveToServer() {
   xhr.send(JSON.stringify(orderData));
 }
 
-// 确认点菜
 function confirmOrder() {
   if (Object.keys(staging).length === 0) {
     alert('请先选择菜品！');
@@ -590,28 +851,21 @@ function confirmOrder() {
   var today = dateKey(0);
   orderData[today] = JSON.parse(JSON.stringify(staging));
 
-  // 只保留最近3天
   var keys = Object.keys(orderData);
   keys.sort();
   while (keys.length > 3) {
     delete orderData[keys.shift()];
   }
 
-  // 清空选择
   clearSelection();
-
-  // 刷新清单
   renderOrderHistory();
-
-  // 保存到服务器
   saveToServer();
 
   alert('已保存！数据已自动同步。');
 }
 
-// 渲染最近3天清单
 function renderOrderHistory() {
-  var orders = getOrders();
+  var orders = orderData;
   var container = document.getElementById('orderHistory');
   container.innerHTML = '';
 
@@ -632,16 +886,14 @@ function renderOrderHistory() {
 
     if (dayOrder && Object.keys(dayOrder).length > 0) {
       var parts = [];
-      var catOrder = ['早饭', '主食', '主菜', '汤类', '水果'];
-      for (var c = 0; c < catOrder.length; c++) {
-        var cat = catOrder[c];
+      for (var c = 0; c < categoryOrder.length; c++) {
+        var cat = categoryOrder[c];
         if (dayOrder[cat] && dayOrder[cat].length > 0) {
           parts.push('<b>' + cat + '</b>：' + dayOrder[cat].join('、'));
         }
       }
-      // 显示其他未列出的类别
       for (var cat2 in dayOrder) {
-        if (catOrder.indexOf(cat2) === -1 && dayOrder[cat2].length > 0) {
+        if (categoryOrder.indexOf(cat2) === -1 && dayOrder[cat2].length > 0) {
           parts.push('<b>' + cat2 + '</b>：' + dayOrder[cat2].join('、'));
         }
       }
@@ -656,9 +908,9 @@ function renderOrderHistory() {
   }
 }
 
-// 页面加载时先读取服务器数据再渲染
+/* ========== 页面初始化 ========== */
+loadMenu();
 loadFromServer();
-renderOrderHistory();
 </script>
 
 </body>
