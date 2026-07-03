@@ -74,7 +74,8 @@ function checkAuth(request) {
   const token = authHeader.replace('Bearer ', '');
   if (!token) return false;
   try {
-    const parts = atob(token).split(':');
+    const decoded = decodeURIComponent(escape(atob(token)));
+    const parts = decoded.split(':');
     return parts.length >= 3 && parts[0] && parts[1];
   } catch(e) {
     return false;

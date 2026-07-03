@@ -27,7 +27,8 @@ export async function onRequest(context) {
 
   if (token) {
     try {
-      const parts = atob(token).split(':');
+      const decoded = decodeURIComponent(escape(atob(token)));
+      const parts = decoded.split(':');
       if (parts.length >= 3 && parts[1] === 'admin') {
         currentUser = parts[0];
       }

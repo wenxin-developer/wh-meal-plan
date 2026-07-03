@@ -59,8 +59,8 @@ export async function onRequest(context) {
       });
     }
 
-    // 生成 token: base64(username:role:timestamp)
-    const token = btoa(username + ':' + user.role + ':' + Date.now());
+    // 生成 token: base64(username:role:timestamp) — UTF-8 安全
+    const token = btoa(unescape(encodeURIComponent(username + ':' + user.role + ':' + Date.now())));
 
     return new Response(JSON.stringify({
       token: token,

@@ -158,7 +158,8 @@
   var token = localStorage.getItem('wh_token');
   if (token) {
     try {
-      var parts = atob(token).split(':');
+      var decoded = decodeURIComponent(escape(atob(token)));
+      var parts = decoded.split(':');
       if (parts.length >= 3 && parts[0] && parts[1]) {
         window.location.href = '/';
         return;
