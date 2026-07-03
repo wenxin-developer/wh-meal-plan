@@ -31,11 +31,14 @@
     margin-top: 6px;
   }
 
-  /* 管理按钮 */
+  /* 管理栏 */
   .manage-bar {
     max-width: 640px;
     margin: 12px auto;
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
   }
 
   .manage-btn {
@@ -53,6 +56,29 @@
 
   .manage-btn:active { transform: scale(0.96); }
   .manage-btn.active { background: #ff7043; color: #fff; }
+
+  /* 添加菜品按钮（编辑模式下显示，在管理栏内） */
+  .add-dish-btn {
+    display: none;
+  }
+
+  body.edit-mode .add-dish-btn { display: inline-block; }
+
+  .add-dish-btn button {
+    background: linear-gradient(135deg, #66bb6a, #43a047);
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 0.88em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(67,160,71,0.25);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .add-dish-btn button:active { transform: scale(0.96); }
 
   /* ---- 分类卡片 ---- */
   .section {
@@ -148,10 +174,67 @@
   .s-fruit .section-header { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
   .s-fruit .item { background: #e8f5e9; color: #1b5e20; }
 
+  /* ---- 点菜区域 ---- */
+  .order-panel {
+    max-width: 640px;
+    margin: 24px auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  .order-panel-header {
+    background: linear-gradient(90deg, #00897b, #4db6ac);
+    padding: 14px 20px;
+    font-size: 1.15em;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* 今日点菜记录 — 分类展示 */
+  .order-history {
+    padding: 16px 20px 20px;
+  }
+
+  .order-cat-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed #eceff1;
+  }
+
+  .order-cat-row:last-child { border-bottom: none; }
+
+  .order-cat-label {
+    width: 70px;
+    font-size: 0.9em;
+    color: #78909c;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+
+  .order-cat-value {
+    flex: 1;
+    font-weight: 600;
+    color: #37474f;
+    font-size: 0.95em;
+  }
+
+  .order-cat-empty {
+    flex: 1;
+    color: #cfd8dc;
+    font-style: italic;
+    font-size: 0.9em;
+  }
+
   /* ---- 随机搭配按钮 ---- */
   .random-wrap {
     max-width: 640px;
-    margin: 28px auto 0;
+    margin: 24px auto 0;
     text-align: center;
   }
 
@@ -213,27 +296,6 @@
     font-weight: 600;
     color: #37474f;
     font-size: 0.95em;
-  }
-
-  /* ---- 点菜区域 ---- */
-  .order-panel {
-    max-width: 640px;
-    margin: 24px auto 80px;
-    background: #fff;
-    border-radius: 14px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    overflow: hidden;
-  }
-
-  .order-panel-header {
-    background: linear-gradient(90deg, #00897b, #4db6ac);
-    padding: 14px 20px;
-    font-size: 1.15em;
-    font-weight: 600;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 10px;
   }
 
   /* 待选区 — 固定在底部 */
@@ -310,42 +372,6 @@
   }
 
   .order-clear-btn:active { transform: scale(0.96); }
-
-  /* 点菜清单 */
-  .order-history {
-    padding: 14px 20px 18px;
-  }
-
-  .order-day-row {
-    display: flex;
-    align-items: flex-start;
-    padding: 10px 0;
-    border-bottom: 1px dashed #eceff1;
-    font-size: 0.92em;
-  }
-
-  .order-day-row:last-child { border-bottom: none; }
-
-  .order-day-label {
-    width: 80px;
-    flex-shrink: 0;
-    font-weight: 600;
-    color: #00897b;
-    font-size: 0.88em;
-    padding-top: 2px;
-  }
-
-  .order-day-items {
-    flex: 1;
-    color: #37474f;
-    line-height: 1.6;
-  }
-
-  .order-day-empty {
-    color: #b0bec5;
-    font-style: italic;
-    font-size: 0.88em;
-  }
 
   /* ---- 添加菜品弹窗 ---- */
   .modal-overlay {
@@ -434,32 +460,6 @@
     color: #fff;
   }
 
-  /* 添加菜品按钮（编辑模式下显示） */
-  .add-dish-btn {
-    display: none;
-    max-width: 640px;
-    margin: 12px auto;
-    text-align: center;
-  }
-
-  body.edit-mode .add-dish-btn { display: block; }
-
-  .add-dish-btn button {
-    background: linear-gradient(135deg, #66bb6a, #43a047);
-    color: #fff;
-    border: none;
-    padding: 10px 24px;
-    border-radius: 24px;
-    font-size: 0.95em;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 3px 10px rgba(67,160,71,0.3);
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-
-  .add-dish-btn button:active { transform: scale(0.96); }
-
   /* 移动端微调 */
   @media (max-width: 480px) {
     body { padding: 16px 10px 50px; }
@@ -478,32 +478,30 @@
   <p>每日饮食搭配，健康生活每一天</p>
 </div>
 
-<!-- 管理按钮 -->
+<!-- 管理栏（管理按钮 + 添加菜品按钮 同行） -->
 <div class="manage-bar">
+  <div class="add-dish-btn">
+    <button onclick="showAddModal()">＋ 添加菜品</button>
+  </div>
   <button class="manage-btn" id="manageBtn" onclick="toggleEditMode()">⚙️ 管理菜品</button>
-</div>
-
-<!-- 添加菜品按钮（编辑模式下显示） -->
-<div class="add-dish-btn">
-  <button onclick="showAddModal()">＋ 添加菜品</button>
 </div>
 
 <!-- 菜品区域（动态渲染） -->
 <div id="menuContainer"></div>
 
-<!-- 随机搭配 -->
+<!-- 今日点菜记录 -->
+<div class="order-panel">
+  <div class="order-panel-header"><span class="emoji">📋</span>今日点菜记录</div>
+  <div class="order-history" id="orderHistory"></div>
+</div>
+
+<!-- 随机搭配（放在最后） -->
 <div class="random-wrap">
   <button class="random-btn" onclick="randomMeal()">🎲 今天吃什么？</button>
 </div>
 <div class="random-result" id="result">
   <h3>✨ 今日推荐搭配</h3>
   <div id="resultBody"></div>
-</div>
-
-<!-- 点菜区域 — 清单历史 -->
-<div class="order-panel">
-  <div class="order-panel-header"><span class="emoji">📋</span>最近3天点菜记录</div>
-  <div class="order-history" id="orderHistory"></div>
 </div>
 
 <!-- 底部固定栏 — 待选区 + 按钮 -->
@@ -580,7 +578,6 @@ function loadMenu() {
         if (data && typeof data === 'object' && Object.keys(data).length > 0) {
           meals = data;
         } else {
-          // KV 为空，使用默认数据并保存
           meals = JSON.parse(JSON.stringify(defaultMeals));
           saveMenu();
         }
@@ -660,7 +657,6 @@ function toggleEditMode() {
     document.body.classList.add('edit-mode');
     btn.classList.add('active');
     btn.textContent = '✓ 完成管理';
-    // 退出编辑模式时清除选中状态
     clearSelection();
   } else {
     document.body.classList.remove('edit-mode');
@@ -690,7 +686,6 @@ function confirmAddDish() {
     return;
   }
 
-  // 检查是否已存在
   if (!meals[cat]) meals[cat] = [];
   if (meals[cat].indexOf(name) !== -1) {
     alert('该分类下已有同名菜品！');
@@ -752,7 +747,6 @@ function randomMeal() {
 /* ========== 点菜功能 ========== */
 
 function toggleSelect(el) {
-  // 编辑模式下不响应选中
   if (editMode) return;
   el.classList.toggle('selected');
   refreshStaging();
@@ -772,7 +766,6 @@ function refreshStaging() {
   for (var i = 0; i < allSelected.length; i++) {
     var el = allSelected[i];
     var cat = el.closest('.section-body').getAttribute('data-category');
-    // 去掉删除按钮的文字
     var name = '';
     for (var k = 0; k < el.childNodes.length; k++) {
       if (el.childNodes[k].nodeType === 3) {
@@ -809,15 +802,6 @@ function dateKey(offsetDays) {
   return y + '-' + m + '-' + day;
 }
 
-function dateLabel(offsetDays) {
-  if (offsetDays === 0) return '今天';
-  if (offsetDays === -1) return '昨天';
-  if (offsetDays === -2) return '前天';
-  var d = new Date();
-  d.setDate(d.getDate() + offsetDays);
-  return (d.getMonth() + 1) + '/' + d.getDate();
-}
-
 function loadFromServer() {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', '/api/orders', true);
@@ -851,12 +835,6 @@ function confirmOrder() {
   var today = dateKey(0);
   orderData[today] = JSON.parse(JSON.stringify(staging));
 
-  var keys = Object.keys(orderData);
-  keys.sort();
-  while (keys.length > 3) {
-    delete orderData[keys.shift()];
-  }
-
   clearSelection();
   renderOrderHistory();
   saveToServer();
@@ -865,45 +843,34 @@ function confirmOrder() {
 }
 
 function renderOrderHistory() {
-  var orders = orderData;
+  var today = dateKey(0);
+  var todayOrder = orderData[today];
   var container = document.getElementById('orderHistory');
   container.innerHTML = '';
 
-  for (var i = 0; i <= 2; i++) {
-    var key = dateKey(-i);
-    var label = dateLabel(-i);
-    var dayOrder = orders[key];
-
+  for (var i = 0; i < categoryOrder.length; i++) {
+    var cat = categoryOrder[i];
     var row = document.createElement('div');
-    row.className = 'order-day-row';
+    row.className = 'order-cat-row';
 
-    var labelDiv = document.createElement('div');
-    labelDiv.className = 'order-day-label';
-    labelDiv.textContent = label;
+    var label = document.createElement('span');
+    label.className = 'order-cat-label';
+    label.textContent = cat;
 
-    var itemsDiv = document.createElement('div');
-    itemsDiv.className = 'order-day-items';
-
-    if (dayOrder && Object.keys(dayOrder).length > 0) {
-      var parts = [];
-      for (var c = 0; c < categoryOrder.length; c++) {
-        var cat = categoryOrder[c];
-        if (dayOrder[cat] && dayOrder[cat].length > 0) {
-          parts.push('<b>' + cat + '</b>：' + dayOrder[cat].join('、'));
-        }
-      }
-      for (var cat2 in dayOrder) {
-        if (categoryOrder.indexOf(cat2) === -1 && dayOrder[cat2].length > 0) {
-          parts.push('<b>' + cat2 + '</b>：' + dayOrder[cat2].join('、'));
-        }
-      }
-      itemsDiv.innerHTML = parts.join('； ');
+    if (todayOrder && todayOrder[cat] && todayOrder[cat].length > 0) {
+      var value = document.createElement('span');
+      value.className = 'order-cat-value';
+      value.textContent = todayOrder[cat].join('、');
+      row.appendChild(label);
+      row.appendChild(value);
     } else {
-      itemsDiv.innerHTML = '<span class="order-day-empty">未点菜</span>';
+      var empty = document.createElement('span');
+      empty.className = 'order-cat-empty';
+      empty.textContent = '—';
+      row.appendChild(label);
+      row.appendChild(empty);
     }
 
-    row.appendChild(labelDiv);
-    row.appendChild(itemsDiv);
     container.appendChild(row);
   }
 }
