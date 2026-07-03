@@ -145,8 +145,8 @@
   .item .delete-x {
     display: none;
     position: absolute;
-    top: -6px;
-    right: -6px;
+    top: -4px;
+    right: -4px;
     width: 18px;
     height: 18px;
     background: #ef5350;
@@ -157,10 +157,13 @@
     text-align: center;
     font-weight: bold;
     box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    z-index: 2;
   }
 
   body.edit-mode .item .delete-x { display: block; }
-  body.edit-mode .item { padding-right: 20px; }
+  body.edit-mode .item { padding-right: 8px; overflow: visible; }
+  body.edit-mode .section { overflow: visible; }
+  body.edit-mode .section-body { overflow: visible; }
 
   /* ---- 各分类配色 ---- */
   .s-breakfast .section-header { background: linear-gradient(90deg, #ff9800, #ffb74d); }
