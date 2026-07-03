@@ -1,4 +1,4 @@
-// 点菜数据 API — 读写 Cloudflare KV
+// 点菜数据 API — 读写 Cloudflare KV（需登录）
 export async function onRequest(context) {
   const { request, env } = context;
   const kv = env.wh_orders;
@@ -7,12 +7,20 @@ export async function onRequest(context) {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
   };
 
   // 处理 OPTIONS 预检请求
   if (request.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders, status: 204 });
+  }
+
+  // 验证登录
+  if (!checkAuth(request)) {
+    return new Response(JSON.stringify({ error: '未登录' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 401
+    });
   }
 
   // 调试：检查 KV 是否可用
@@ -59,4 +67,16 @@ export async function onRequest(context) {
     headers: corsHeaders,
     status: 404
   });
+}
+
+function checkAuth(request) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace('Bearer ', '');
+  if (!token) return false;
+  try {
+    const parts = atob(token).split(':');
+    return parts.length >= 3 && parts[0] && parts[1];
+  } catch(e) {
+    return false;
+  }
 }
