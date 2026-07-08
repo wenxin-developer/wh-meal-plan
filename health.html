@@ -81,28 +81,30 @@
   .today-title {
     font-size: 1.2em;
     font-weight: 700;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
 
-  .check-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+  /* 单列列表布局 - 完美对齐 */
+  .check-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .check-item {
     background: rgba(255,255,255,0.15);
-    border-radius: 14px;
-    padding: 14px;
+    border-radius: 12px;
+    padding: 12px 14px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition: all 0.15s;
+    height: 48px;
   }
 
-  .check-item:active { transform: scale(0.97); }
+  .check-item:active { transform: scale(0.98); }
 
   .check-item.checked {
     background: rgba(255,255,255,0.3);
@@ -116,7 +118,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.9em;
+    font-size: 0.85em;
     flex-shrink: 0;
     transition: all 0.15s;
   }
@@ -128,9 +130,88 @@
   }
 
   .check-label {
-    font-size: 0.92em;
+    flex: 1;
+    font-size: 0.95em;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 24px;
   }
+
+  .check-delete {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: rgba(255,255,255,0.6);
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s;
+    line-height: 1;
+    padding: 0;
+  }
+
+  .check-delete:hover {
+    background: rgba(255,80,80,0.4);
+    color: #fff;
+  }
+
+  /* 新增打卡项 */
+  .add-item-row {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .add-item-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px dashed rgba(255,255,255,0.35);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 0.92em;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .add-item-row input::placeholder {
+    color: rgba(255,255,255,0.5);
+  }
+
+  .add-item-row input:focus {
+    border-color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.15);
+  }
+
+  .add-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.25);
+    border: none;
+    color: #fff;
+    font-size: 1.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s;
+    line-height: 1;
+    padding: 0;
+  }
+
+  .add-btn:active { transform: scale(0.92); }
 
   /* 统计卡片 */
   .stats-section {
@@ -198,7 +279,7 @@
     font-size: 0.88em;
     font-weight: 600;
     color: #1f2937;
-    flex: 0 0 80px;
+    flex: 0 0 50px;
   }
 
   .history-checks {
@@ -235,8 +316,7 @@
 
   @media (max-width: 480px) {
     body { padding: 0 10px 32px; }
-    .check-grid { gap: 10px; }
-    .check-item { padding: 12px; }
+    .check-item { padding: 10px 12px; }
     .stats-section { gap: 8px; }
     .stat-card { padding: 14px 8px; }
     .stat-value { font-size: 1.5em; }
@@ -258,7 +338,11 @@
     <div class="today-streak" id="todayStreak">🔥 连续 0 天</div>
   </div>
   <div class="today-title">今日健康打卡</div>
-  <div class="check-grid" id="checkGrid"></div>
+  <div class="check-list" id="checkList"></div>
+  <div class="add-item-row">
+    <input type="text" id="newItemInput" placeholder="输入新打卡项，如：🧘 冥想10分钟" maxlength="20">
+    <button class="add-btn" onclick="addItem()" title="添加">+</button>
+  </div>
 </div>
 
 <!-- 统计 -->
@@ -288,7 +372,7 @@ var currentUser = null;
 var authToken = null;
 var healthData = {};
 
-var checkItems = [
+var defaultItems = [
   { id: 'water', label: '💧 喝水8杯' },
   { id: 'exercise', label: '🏃 运动30分钟' },
   { id: 'sleep', label: '😴 早睡(23点前)' },
@@ -296,6 +380,8 @@ var checkItems = [
   { id: 'walk', label: '🚶 步行6000步' },
   { id: 'stretch', label: '🧘 拉伸放松' }
 ];
+
+var checkItems = [];
 
 (function checkAuth() {
   var token = localStorage.getItem('wh_token');
@@ -323,6 +409,12 @@ function initPage() {
   var now = new Date();
   var weekdays = ['日','一','二','三','四','五','六'];
   document.getElementById('todayDate').textContent = (now.getMonth()+1) + '月' + now.getDate() + '日 周' + weekdays[now.getDay()];
+
+  // Enter key to add item
+  document.getElementById('newItemInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); addItem(); }
+  });
+
   loadData();
 }
 
@@ -331,6 +423,49 @@ function dateKey(d) {
   var m = ('0' + (d.getMonth() + 1)).slice(-2);
   var day = ('0' + d.getDate()).slice(-2);
   return y + '-' + m + '-' + day;
+}
+
+function getItems() {
+  if (healthData._items && healthData._items.length > 0) {
+    return healthData._items;
+  }
+  return defaultItems.slice();
+}
+
+function saveItems(items) {
+  healthData._items = items;
+  checkItems = items;
+}
+
+function addItem() {
+  var input = document.getElementById('newItemInput');
+  var val = input.value.trim();
+  if (!val) return;
+
+  var items = getItems();
+  var id = 'custom_' + Date.now();
+  items.push({ id: id, label: val });
+  saveItems(items);
+  saveData();
+  input.value = '';
+  renderAll();
+}
+
+function deleteItem(id) {
+  var items = getItems();
+  items = items.filter(function(x) { return x.id !== id; });
+  saveItems(items);
+
+  // Also remove from all history
+  for (var key in healthData) {
+    if (key === '_items') continue;
+    if (Array.isArray(healthData[key])) {
+      healthData[key] = healthData[key].filter(function(x) { return x !== id; });
+    }
+  }
+
+  saveData();
+  renderAll();
 }
 
 function toggleCheck(id) {
@@ -345,6 +480,11 @@ function toggleCheck(id) {
   }
 
   saveData();
+  renderAll();
+}
+
+function renderAll() {
+  checkItems = getItems();
   renderChecks();
   renderStats();
   renderHistory();
@@ -353,7 +493,7 @@ function toggleCheck(id) {
 function renderChecks() {
   var today = dateKey(new Date());
   var todayChecks = healthData[today] || [];
-  var grid = document.getElementById('checkGrid');
+  var list = document.getElementById('checkList');
   var html = '';
 
   for (var i = 0; i < checkItems.length; i++) {
@@ -361,11 +501,18 @@ function renderChecks() {
     var checked = todayChecks.indexOf(item.id) !== -1;
     html += '<div class="check-item' + (checked ? ' checked' : '') + '" onclick="toggleCheck(\'' + item.id + '\')">';
     html += '<div class="check-box">' + (checked ? '✓' : '') + '</div>';
-    html += '<div class="check-label">' + item.label + '</div>';
+    html += '<div class="check-label">' + escapeHtml(item.label) + '</div>';
+    html += '<button class="check-delete" onclick="event.stopPropagation();deleteItem(\'' + item.id + '\')" title="删除">×</button>';
     html += '</div>';
   }
 
-  grid.innerHTML = html;
+  list.innerHTML = html;
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 function calcStreak() {
@@ -375,7 +522,7 @@ function calcStreak() {
 
   while (true) {
     var key = dateKey(d);
-    if (healthData[key] && healthData[key].length > 0) {
+    if (healthData[key] && Array.isArray(healthData[key]) && healthData[key].length > 0) {
       streak++;
       d.setDate(d.getDate() - 1);
     } else {
@@ -387,14 +534,19 @@ function calcStreak() {
 }
 
 function renderStats() {
-  var total = Object.keys(healthData).length;
+  var total = 0;
+  for (var key in healthData) {
+    if (key === '_items') continue;
+    if (Array.isArray(healthData[key]) && healthData[key].length > 0) total++;
+  }
   var streak = calcStreak();
   var now = new Date();
   var monthKey = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2);
   var monthCount = 0;
 
   for (var key in healthData) {
-    if (key.indexOf(monthKey) === 0) monthCount++;
+    if (key === '_items') continue;
+    if (key.indexOf(monthKey) === 0 && Array.isArray(healthData[key]) && healthData[key].length > 0) monthCount++;
   }
 
   document.getElementById('statTotal').textContent = total;
@@ -404,8 +556,16 @@ function renderStats() {
 }
 
 function renderHistory() {
-  var keys = Object.keys(healthData).sort().reverse().slice(0, 10);
+  var keys = [];
+  for (var key in healthData) {
+    if (key === '_items') continue;
+    if (Array.isArray(healthData[key]) && healthData[key].length > 0) keys.push(key);
+  }
+  keys.sort().reverse();
+  keys = keys.slice(0, 10);
+
   var container = document.getElementById('historyList');
+  var items = getItems();
 
   if (keys.length === 0) {
     container.innerHTML = '<div class="empty-state"><div class="emoji">💪</div><p>还没有打卡记录，今天就开始吧</p></div>';
@@ -423,13 +583,14 @@ function renderHistory() {
     html += '<div class="history-date">' + dateStr + '</div>';
     html += '<div class="history-checks">';
     for (var j = 0; j < checks.length; j++) {
-      var item = checkItems.find(function(x) { return x.id === checks[j]; });
+      var item = items.find(function(x) { return x.id === checks[j]; });
       if (item) {
-        html += '<span class="history-tag">' + item.label.split(' ')[0] + '</span>';
+        var emoji = item.label.split(' ')[0];
+        html += '<span class="history-tag">' + emoji + '</span>';
       }
     }
     html += '</div>';
-    html += '<div class="history-count">' + checks.length + '/' + checkItems.length + '</div>';
+    html += '<div class="history-count">' + checks.length + '/' + items.length + '</div>';
     html += '</div>';
   }
 
@@ -452,14 +613,12 @@ function loadData() {
         if (typeof healthData !== 'object') healthData = {};
       } catch(e) { healthData = {}; }
     }
-    renderChecks();
-    renderStats();
-    renderHistory();
+    checkItems = getItems();
+    renderAll();
   };
   xhr.onerror = function() {
-    renderChecks();
-    renderStats();
-    renderHistory();
+    checkItems = getItems();
+    renderAll();
   };
   xhr.send();
 }
