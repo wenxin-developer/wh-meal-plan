@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>纪念日 - 我们的小日子</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(160deg, #fdf2f8 0%, #fce7f3 50%, #fff1f2 100%);
+    min-height: 100vh;
+    padding: 0 16px 40px;
+  }
+
+  .nav-bar {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 16px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #546e7a;
+    font-size: 0.88em;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .back-btn:active { transform: scale(0.96); }
+
+  .page-title {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: #be185d;
+    flex: 1;
+  }
+
+  /* 主纪念日卡片 */
+  .hero-card {
+    max-width: 560px;
+    margin: 16px auto;
+    background: linear-gradient(135deg, #ec4899, #f43f5e);
+    border-radius: 20px;
+    padding: 28px 24px;
+    color: #fff;
+    box-shadow: 0 6px 24px rgba(236,72,153,0.3);
+    text-align: center;
+  }
+
+  .hero-label {
+    font-size: 0.88em;
+    opacity: 0.85;
+    margin-bottom: 6px;
+  }
+
+  .hero-title {
+    font-size: 1.3em;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .hero-days {
+    font-size: 3.5em;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .hero-unit {
+    font-size: 0.9em;
+    opacity: 0.8;
+  }
+
+  .hero-date {
+    margin-top: 12px;
+    font-size: 0.85em;
+    opacity: 0.75;
+  }
+
+  /* 添加按钮 */
+  .add-btn {
+    max-width: 560px;
+    margin: 20px auto;
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: #fff;
+    border: 2px dashed #f9a8d4;
+    border-radius: 16px;
+    font-size: 1em;
+    font-weight: 600;
+    color: #be185d;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: all 0.15s;
+  }
+
+  .add-btn:active { transform: scale(0.98); background: #fce7f3; }
+
+  /* 纪念日列表 */
+  .list-section {
+    max-width: 560px;
+    margin: 20px auto;
+  }
+
+  .section-label {
+    font-size: 0.88em;
+    font-weight: 600;
+    color: #78909c;
+    margin-bottom: 12px;
+    padding-left: 4px;
+  }
+
+  .anni-card {
+    background: #fff;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    padding: 16px 18px;
+    gap: 14px;
+  }
+
+  .anni-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f9a8d4, #ec4899);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    flex-shrink: 0;
+  }
+
+  .anni-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .anni-name {
+    font-size: 0.95em;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .anni-date {
+    font-size: 0.78em;
+    color: #9ca3af;
+    margin-top: 3px;
+  }
+
+  .anni-days {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .anni-days-num {
+    font-size: 1.4em;
+    font-weight: 800;
+    color: #ec4899;
+    line-height: 1;
+  }
+
+  .anni-days-label {
+    font-size: 0.7em;
+    color: #9ca3af;
+    margin-top: 2px;
+  }
+
+  .anni-del {
+    background: none;
+    border: none;
+    color: #e0e0e0;
+    font-size: 1.1em;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .anni-del:hover { color: #e53935; }
+
+  /* 弹窗 */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal-box {
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+
+  .modal-box h3 {
+    margin-bottom: 18px;
+    color: #be185d;
+    font-size: 1.15em;
+    text-align: center;
+  }
+
+  .modal-box label {
+    display: block;
+    font-size: 0.88em;
+    color: #546e7a;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .modal-box input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #cfd8dc;
+    border-radius: 12px;
+    font-size: 0.95em;
+    margin-bottom: 14px;
+    outline: none;
+    background: #fafafa;
+    -webkit-appearance: none;
+  }
+
+  .modal-box input:focus {
+    border-color: #ec4899;
+    box-shadow: 0 0 0 3px rgba(236,72,153,0.1);
+    background: #fff;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .modal-actions button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .modal-cancel { background: #eceff1; color: #546e7a; }
+  .modal-confirm { background: linear-gradient(135deg, #ec4899, #f43f5e); color: #fff; }
+  .modal-confirm:active { transform: scale(0.97); }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #d1d5db;
+  }
+
+  .empty-state .emoji { font-size: 2.5em; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.92em; color: #9ca3af; }
+
+  @media (max-width: 480px) {
+    body { padding: 0 10px 32px; }
+    .hero-days { font-size: 2.8em; }
+    .anni-card { padding: 14px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a class="back-btn" href="/">← 返回</a>
+  <span class="page-title">💕 纪念日</span>
+</div>
+
+<!-- 主纪念日 -->
+<div class="hero-card" id="heroCard">
+  <div class="hero-label">在一起</div>
+  <div class="hero-title" id="heroTitle">❤️</div>
+  <div class="hero-days" id="heroDays">-</div>
+  <div class="hero-unit">天</div>
+  <div class="hero-date" id="heroDate"></div>
+</div>
+
+<button class="add-btn" onclick="showAddModal()">＋ 添加纪念日</button>
+
+<!-- 列表 -->
+<div class="list-section">
+  <div class="section-label">📌 所有纪念日</div>
+  <div id="anniList"></div>
+</div>
+
+<!-- 添加弹窗 -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box">
+    <h3>💕 添加纪念日</h3>
+    <label>名称</label>
+    <input type="text" id="anniName" placeholder="例如：在一起、结婚纪念日" maxlength="30">
+    <label>日期</label>
+    <input type="date" id="anniDate">
+    <label>图标（可选）</label>
+    <input type="text" id="anniIcon" placeholder="输入一个emoji，例如 💍" maxlength="4">
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="hideAddModal()">取消</button>
+      <button class="modal-confirm" onclick="confirmAdd()">添加</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var currentUser = null;
+var authToken = null;
+var anniversaries = [];
+
+(function checkAuth() {
+  var token = localStorage.getItem('wh_token');
+  if (!token) { window.location.href = '/login.html'; return; }
+  try {
+    var decoded = decodeURIComponent(escape(atob(token)));
+    var parts = decoded.split(':');
+    if (parts.length >= 3 && parts[0] && parts[1]) {
+      currentUser = parts[0];
+      authToken = token;
+    } else {
+      localStorage.removeItem('wh_token');
+      window.location.href = '/login.html';
+      return;
+    }
+  } catch(e) {
+    localStorage.removeItem('wh_token');
+    window.location.href = '/login.html';
+    return;
+  }
+  loadData();
+})();
+
+function loadData() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/api/anniversary', true);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
+  xhr.onload = function() {
+    if (xhr.status === 401) {
+      localStorage.removeItem('wh_token');
+      window.location.href = '/login.html';
+      return;
+    }
+    if (xhr.status === 200) {
+      try {
+        anniversaries = JSON.parse(xhr.responseText);
+        if (!Array.isArray(anniversaries)) anniversaries = [];
+      } catch(e) { anniversaries = []; }
+    }
+    render();
+  };
+  xhr.onerror = function() { render(); };
+  xhr.send();
+}
+
+function saveData() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/anniversary', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
+  xhr.send(JSON.stringify(anniversaries));
+}
+
+function calcDays(dateStr) {
+  var d = new Date(dateStr);
+  var now = new Date();
+  now.setHours(0,0,0,0);
+  d.setHours(0,0,0,0);
+  return Math.floor((now - d) / (1000 * 60 * 60 * 24));
+}
+
+function render() {
+  // 主纪念日（第一个或天数最多的）
+  if (anniversaries.length > 0) {
+    var main = anniversaries[0];
+    var days = calcDays(main.date);
+    document.getElementById('heroTitle').textContent = main.name;
+    document.getElementById('heroDays').textContent = days;
+    document.getElementById('heroDate').textContent = main.date + ' 至今';
+    document.getElementById('heroCard').style.display = 'block';
+  } else {
+    document.getElementById('heroCard').style.display = 'none';
+  }
+
+  var container = document.getElementById('anniList');
+  if (anniversaries.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="emoji">💕</div><p>还没有纪念日，添加第一个吧</p></div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < anniversaries.length; i++) {
+    var a = anniversaries[i];
+    var days = calcDays(a.date);
+    var icon = a.icon || '💕';
+    html += '<div class="anni-card">';
+    html += '<div class="anni-icon">' + icon + '</div>';
+    html += '<div class="anni-info">';
+    html += '<div class="anni-name">' + escapeHtml(a.name) + '</div>';
+    html += '<div class="anni-date">' + a.date + '</div>';
+    html += '</div>';
+    html += '<div class="anni-days"><div class="anni-days-num">' + days + '</div><div class="anni-days-label">天</div></div>';
+    html += '<button class="anni-del" onclick="deleteAnni(' + i + ')">×</button>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function showAddModal() {
+  document.getElementById('addModal').classList.add('show');
+  document.getElementById('anniName').value = '';
+  document.getElementById('anniDate').value = '';
+  document.getElementById('anniIcon').value = '';
+}
+
+function hideAddModal() {
+  document.getElementById('addModal').classList.remove('show');
+}
+
+function confirmAdd() {
+  var name = document.getElementById('anniName').value.trim();
+  var date = document.getElementById('anniDate').value;
+  var icon = document.getElementById('anniIcon').value.trim() || '💕';
+
+  if (!name) { alert('请输入名称'); return; }
+  if (!date) { alert('请选择日期'); return; }
+
+  anniversaries.push({ name: name, date: date, icon: icon });
+  // 按日期排序（最早的排前面作为主纪念日）
+  anniversaries.sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
+  saveData();
+  render();
+  hideAddModal();
+}
+
+function deleteAnni(index) {
+  if (!confirm('确定删除「' + anniversaries[index].name + '」吗？')) return;
+  anniversaries.splice(index, 1);
+  saveData();
+  render();
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+
+</body>
+</html>

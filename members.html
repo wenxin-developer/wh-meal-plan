@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成员管理 - 我们的小日子</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(160deg, #f5f3ff 0%, #ede9fe 50%, #faf5ff 100%);
+    min-height: 100vh;
+    padding: 0 16px 40px;
+  }
+
+  .nav-bar {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 16px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #546e7a;
+    font-size: 0.88em;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .back-btn:active { transform: scale(0.96); }
+
+  .page-title {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: #7c3aed;
+    flex: 1;
+  }
+
+  /* 用户列表 */
+  .user-section {
+    max-width: 520px;
+    margin: 20px auto;
+  }
+
+  .section-label {
+    font-size: 0.88em;
+    font-weight: 600;
+    color: #78909c;
+    margin-bottom: 12px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-label .count {
+    background: #ede9fe;
+    color: #7c3aed;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.85em;
+  }
+
+  .user-list {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  .user-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f5f5f5;
+    gap: 14px;
+  }
+
+  .user-item:last-child { border-bottom: none; }
+
+  .user-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c084fc, #7c3aed);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .user-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .user-name {
+    font-size: 1em;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .user-role {
+    display: inline-block;
+    font-size: 0.72em;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .role-admin { background: #fff3e0; color: #e65100; }
+  .role-user { background: #e8f5e9; color: #2e7d32; }
+
+  .user-del {
+    background: none;
+    border: 1.5px solid #fecdd3;
+    color: #be123c;
+    font-size: 0.82em;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-weight: 500;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s;
+  }
+
+  .user-del:active { background: #ffebee; transform: scale(0.96); }
+
+  /* 添加用户表单 */
+  .add-section {
+    max-width: 520px;
+    margin: 24px auto;
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .add-section h3 {
+    font-size: 1em;
+    color: #7c3aed;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+
+  .form-row input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 16px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 0.95em;
+    outline: none;
+    background: #fafafa;
+    -webkit-appearance: none;
+  }
+
+  .form-row input:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+    background: #fff;
+  }
+
+  .form-row select {
+    padding: 12px 10px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 0.88em;
+    outline: none;
+    background: #fafafa;
+    -webkit-appearance: none;
+    appearance: none;
+    text-align: center;
+    text-align-last: center;
+    min-width: 90px;
+  }
+
+  .add-btn {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(124,58,237,0.3);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .add-btn:active { transform: scale(0.97); }
+
+  /* 无权限提示 */
+  .no-perm {
+    max-width: 520px;
+    margin: 40px auto;
+    text-align: center;
+    padding: 40px 20px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .no-perm .emoji { font-size: 3em; margin-bottom: 16px; }
+  .no-perm p { color: #78909c; font-size: 0.95em; line-height: 1.6; }
+
+  @media (max-width: 480px) {
+    body { padding: 0 10px 32px; }
+    .user-item { padding: 14px 16px; }
+    .form-row { flex-wrap: wrap; }
+    .form-row select { flex: 0 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a class="back-btn" href="/">← 返回</a>
+  <span class="page-title">👥 成员管理</span>
+</div>
+
+<!-- 管理员：显示用户列表和添加表单 -->
+<div id="adminView" style="display:none">
+  <div class="user-section">
+    <div class="section-label">
+      家庭成员 <span class="count" id="userCount">0</span>
+    </div>
+    <div class="user-list" id="userList"></div>
+  </div>
+
+  <div class="add-section">
+    <h3>➕ 添加新成员</h3>
+    <div class="form-row">
+      <input type="text" id="newUsername" placeholder="用户名" maxlength="20">
+      <select id="newUserRole">
+        <option value="user">普通用户</option>
+        <option value="admin">管理员</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <input type="text" id="newUserPassword" placeholder="密码（至少4位）" maxlength="30">
+    </div>
+    <button class="add-btn" onclick="addUser()">添加成员</button>
+  </div>
+</div>
+
+<!-- 非管理员：无权限提示 -->
+<div id="noPermView" style="display:none">
+  <div class="no-perm">
+    <div class="emoji">🔒</div>
+    <p>当前账号无管理权限<br>如需添加成员请联系管理员</p>
+  </div>
+</div>
+
+<script>
+var currentUser = null;
+var currentRole = null;
+var authToken = null;
+
+(function checkAuth() {
+  var token = localStorage.getItem('wh_token');
+  if (!token) { window.location.href = '/login.html'; return; }
+  try {
+    var decoded = decodeURIComponent(escape(atob(token)));
+    var parts = decoded.split(':');
+    if (parts.length >= 3 && parts[0] && parts[1]) {
+      currentUser = parts[0];
+      currentRole = parts[1];
+      authToken = token;
+    } else {
+      localStorage.removeItem('wh_token');
+      window.location.href = '/login.html';
+      return;
+    }
+  } catch(e) {
+    localStorage.removeItem('wh_token');
+    window.location.href = '/login.html';
+    return;
+  }
+
+  if (currentRole === 'admin') {
+    document.getElementById('adminView').style.display = 'block';
+    loadUserList();
+  } else {
+    document.getElementById('noPermView').style.display = 'block';
+  }
+})();
+
+function loadUserList() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/api/users', true);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      try {
+        var users = JSON.parse(xhr.responseText);
+        renderUserList(users);
+      } catch(e) {}
+    }
+  };
+  xhr.send();
+}
+
+function renderUserList(users) {
+  var container = document.getElementById('userList');
+  container.innerHTML = '';
+  document.getElementById('userCount').textContent = users.length;
+
+  for (var i = 0; i < users.length; i++) {
+    var u = users[i];
+    var item = document.createElement('div');
+    item.className = 'user-item';
+
+    var avatar = document.createElement('div');
+    avatar.className = 'user-avatar';
+    avatar.textContent = u.username.charAt(0).toUpperCase();
+    item.appendChild(avatar);
+
+    var info = document.createElement('div');
+    info.className = 'user-info';
+    var name = document.createElement('div');
+    name.className = 'user-name';
+    name.textContent = u.username;
+    info.appendChild(name);
+    var role = document.createElement('span');
+    role.className = 'user-role ' + (u.role === 'admin' ? 'role-admin' : 'role-user');
+    role.textContent = u.role === 'admin' ? '管理员' : '普通用户';
+    info.appendChild(role);
+    item.appendChild(info);
+
+    if (u.username !== currentUser) {
+      var delBtn = document.createElement('button');
+      delBtn.className = 'user-del';
+      delBtn.textContent = '移除';
+      delBtn.setAttribute('onclick', 'deleteUser("' + u.username + '")');
+      item.appendChild(delBtn);
+    }
+
+    container.appendChild(item);
+  }
+}
+
+function addUser() {
+  var username = document.getElementById('newUsername').value.trim();
+  var password = document.getElementById('newUserPassword').value;
+  var role = document.getElementById('newUserRole').value;
+
+  if (!username) { alert('请输入用户名'); return; }
+  if (!password || password.length < 4) { alert('密码至少4个字符'); return; }
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/users', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      document.getElementById('newUsername').value = '';
+      document.getElementById('newUserPassword').value = '';
+      loadUserList();
+    } else {
+      try {
+        var res = JSON.parse(xhr.responseText);
+        alert(res.error || '添加失败');
+      } catch(e) { alert('添加失败'); }
+    }
+  };
+  xhr.send(JSON.stringify({ username: username, password: password, role: role }));
+}
+
+function deleteUser(username) {
+  if (!confirm('确定移除成员「' + username + '」吗？')) return;
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('DELETE', '/api/users', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      loadUserList();
+    } else {
+      try {
+        var res = JSON.parse(xhr.responseText);
+        alert(res.error || '移除失败');
+      } catch(e) { alert('移除失败'); }
+    }
+  };
+  xhr.send(JSON.stringify({ username: username }));
+}
+</script>
+
+</body>
+</html>

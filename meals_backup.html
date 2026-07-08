@@ -3,34 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>我们的小日子</title>
+<title>WH 家庭生活</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    background: linear-gradient(160deg, #fef9f0 0%, #fdf2f8 40%, #eff6ff 100%);
+    background: linear-gradient(135deg, #fce4ec 0%, #e8f5e9 50%, #e3f2fd 100%);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 20px;
+    padding: 0 16px;
   }
 
   /* 顶部用户区 */
   .top-bar {
     width: 100%;
-    max-width: 440px;
-    margin-top: 52px;
+    max-width: 480px;
+    margin-top: 48px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 18px;
-    background: rgba(255,255,255,0.9);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-radius: 18px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
   }
 
   .top-left {
@@ -40,15 +40,15 @@
   }
 
   .avatar {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #f97316, #ec4899);
+    background: linear-gradient(135deg, #6c5ce7, #0984e3);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.15em;
+    font-size: 1.2em;
     font-weight: 700;
     flex-shrink: 0;
   }
@@ -60,27 +60,27 @@
   }
 
   .greeting-hi {
-    font-size: 0.82em;
-    color: #9ca3af;
+    font-size: 0.85em;
+    color: #90a4ae;
   }
 
   .greeting-name {
-    font-size: 1.05em;
+    font-size: 1.1em;
     font-weight: 700;
-    color: #1f2937;
+    color: #37474f;
   }
 
   .logout-btn {
     display: flex;
     align-items: center;
     gap: 4px;
-    border: 1.5px solid #fecdd3;
-    background: #fff1f2;
-    color: #be123c;
-    font-size: 0.8em;
+    border: 1.5px solid #ffcdd2;
+    background: #fff5f5;
+    color: #c62828;
+    font-size: 0.82em;
     font-weight: 500;
     cursor: pointer;
-    padding: 7px 14px;
+    padding: 8px 14px;
     border-radius: 20px;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -92,43 +92,43 @@
   /* 日期显示 */
   .date-display {
     width: 100%;
-    max-width: 440px;
+    max-width: 480px;
     text-align: center;
-    margin-top: 28px;
-    margin-bottom: 4px;
+    margin-top: 32px;
+    margin-bottom: 8px;
   }
 
   .date-display .day {
-    font-size: 2.6em;
+    font-size: 2.8em;
     font-weight: 800;
-    color: #1f2937;
+    color: #37474f;
     letter-spacing: -1px;
     line-height: 1;
   }
 
   .date-display .weekday {
-    font-size: 0.92em;
-    color: #9ca3af;
-    margin-top: 6px;
+    font-size: 1em;
+    color: #78909c;
+    margin-top: 4px;
     font-weight: 500;
   }
 
-  /* APP 网格 — 4列2行 完美对齐 */
+  /* APP 网格 */
   .app-grid {
     width: 100%;
-    max-width: 440px;
-    margin-top: 28px;
+    max-width: 480px;
+    margin-top: 32px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px 0;
-    padding: 0 4px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px 16px;
+    padding: 0 8px;
   }
 
   .app-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -136,53 +136,47 @@
   }
 
   .app-item:active .app-icon {
-    transform: scale(0.9);
+    transform: scale(0.92);
   }
 
   .app-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.6em;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    font-size: 2em;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
     transition: transform 0.15s;
   }
 
   .app-label {
-    font-size: 0.78em;
+    font-size: 0.85em;
     font-weight: 600;
-    color: #4b5563;
+    color: #455a64;
     text-align: center;
-    white-space: nowrap;
   }
 
   /* 各APP配色 */
-  .icon-meals     { background: linear-gradient(135deg, #fb923c, #f97316); }
-  .icon-todos     { background: linear-gradient(135deg, #4ade80, #16a34a); }
-  .icon-plans     { background: linear-gradient(135deg, #60a5fa, #2563eb); }
-  .icon-members   { background: linear-gradient(135deg, #c084fc, #7c3aed); }
-  .icon-messages  { background: linear-gradient(135deg, #fb7185, #e11d48); }
-  .icon-finance   { background: linear-gradient(135deg, #fbbf24, #d97706); }
-  .icon-anniversary { background: linear-gradient(135deg, #f472b6, #db2777); }
-  .icon-health    { background: linear-gradient(135deg, #34d399, #059669); }
+  .icon-meals { background: linear-gradient(135deg, #ff9800, #ff5722); }
+  .icon-todos { background: linear-gradient(135deg, #4caf50, #2e7d32); }
+  .icon-plans { background: linear-gradient(135deg, #2196f3, #1565c0); }
 
   /* 底部 */
   .footer {
     margin-top: auto;
     padding: 32px 0 24px;
     text-align: center;
-    font-size: 0.78em;
-    color: #d1d5db;
+    font-size: 0.8em;
+    color: #b0bec5;
   }
 
   /* 移动端 */
   @media (max-width: 380px) {
-    .app-icon { width: 50px; height: 50px; font-size: 1.4em; border-radius: 14px; }
-    .app-grid { gap: 16px 0; }
-    .date-display .day { font-size: 2.2em; }
+    .app-icon { width: 64px; height: 64px; font-size: 1.7em; border-radius: 16px; }
+    .app-grid { gap: 20px 12px; }
+    .date-display .day { font-size: 2.4em; }
   }
 </style>
 </head>
@@ -197,7 +191,7 @@
       <span class="greeting-name" id="greetingName"></span>
     </div>
   </div>
-  <button class="logout-btn" onclick="doLogout()">退出</button>
+  <button class="logout-btn" onclick="doLogout()">🚪 退出</button>
 </div>
 
 <!-- 日期 -->
@@ -206,7 +200,7 @@
   <div class="weekday" id="dateWeekday"></div>
 </div>
 
-<!-- APP 网格 4x2 -->
+<!-- APP 网格 -->
 <div class="app-grid">
   <a class="app-item" href="/meals.html">
     <div class="app-icon icon-meals">🍽️</div>
@@ -220,31 +214,12 @@
     <div class="app-icon icon-plans">🗓️</div>
     <span class="app-label">周末计划</span>
   </a>
-  <a class="app-item" href="/members.html">
-    <div class="app-icon icon-members">👥</div>
-    <span class="app-label">成员管理</span>
-  </a>
-  <a class="app-item" href="/messages.html">
-    <div class="app-icon icon-messages">💌</div>
-    <span class="app-label">情感倾诉</span>
-  </a>
-  <a class="app-item" href="/finance.html">
-    <div class="app-icon icon-finance">💰</div>
-    <span class="app-label">家庭记账</span>
-  </a>
-  <a class="app-item" href="/anniversary.html">
-    <div class="app-icon icon-anniversary">💕</div>
-    <span class="app-label">纪念日</span>
-  </a>
-  <a class="app-item" href="/health.html">
-    <div class="app-icon icon-health">💪</div>
-    <span class="app-label">健康打卡</span>
-  </a>
 </div>
 
-<div class="footer">我们的小日子 · 让每一天都有期待</div>
+<div class="footer">WH 家庭生活 · 让每一天都有期待 🌿</div>
 
 <script>
+// 登录验证
 var currentUser = null;
 var currentRole = null;
 
@@ -271,8 +246,10 @@ var currentRole = null;
 })();
 
 function initPage() {
+  // 头像
   document.getElementById('avatar').textContent = currentUser.charAt(0).toUpperCase();
 
+  // 问候语
   var hour = new Date().getHours();
   var hi = '';
   if (hour < 6) hi = '夜深了';
@@ -283,11 +260,14 @@ function initPage() {
   else if (hour < 22) hi = '晚上好';
   else hi = '夜深了';
 
-  document.getElementById('greetingHi').textContent = hi;
+  document.getElementById('greetingHi').textContent = hi + ' 👋';
   document.getElementById('greetingName').textContent = currentUser;
 
+  // 日期
   var now = new Date();
+  var months = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
   var weekdays = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+
   document.getElementById('dateDay').textContent = (now.getMonth()+1) + '月' + now.getDate() + '日';
   document.getElementById('dateWeekday').textContent = weekdays[now.getDay()] + ' · ' + now.getFullYear();
 }

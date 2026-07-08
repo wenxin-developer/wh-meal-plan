@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>今日点餐 - WH 家庭生活</title>
+<title>今日点餐 - 我们的小日子</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -553,16 +553,6 @@
 
   .user-actions button:active { transform: scale(0.96); }
 
-  .user-actions .user-mgmt-btn {
-    border-color: #d1c4e9;
-    background: #f3e5f5;
-    color: #6c5ce7;
-  }
-
-  .user-actions .user-mgmt-btn:hover {
-    background: #ede7f6;
-  }
-
   .user-actions .logout-btn {
     border-color: #ffcdd2;
     background: #fff5f5;
@@ -607,114 +597,6 @@
     from { opacity: 1; transform: translateY(0) scale(1); }
     to   { opacity: 0; transform: translateY(-8px) scale(0.95); }
   }
-
-  /* ---- 用户管理弹窗 ---- */
-  .user-list {
-    margin: 12px 0;
-    max-height: 240px;
-    overflow-y: auto;
-  }
-
-  .user-list-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 12px;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 0.92em;
-  }
-
-  .user-list-item:last-child { border-bottom: none; }
-
-  .user-list-name {
-    font-weight: 600;
-    color: #37474f;
-  }
-
-  .user-list-role {
-    font-size: 0.8em;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-weight: 500;
-    margin-left: 8px;
-  }
-
-  .role-admin { background: #fff3e0; color: #e65100; }
-  .role-user { background: #e8f5e9; color: #2e7d32; }
-
-  .user-list-del {
-    background: none;
-    border: none;
-    color: #e53935;
-    font-size: 0.85em;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-weight: 500;
-  }
-
-  .user-list-del:active { background: #ffebee; }
-
-  .add-user-form {
-    border-top: 1px solid #eceff1;
-    padding-top: 14px;
-    margin-top: 8px;
-  }
-
-  .add-user-form h4 {
-    font-size: 0.92em;
-    color: #546e7a;
-    margin-bottom: 10px;
-  }
-
-  .add-user-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-    align-items: center;
-  }
-
-  .add-user-row input {
-    flex: 1;
-    min-width: 0;
-    padding: 10px 14px;
-    border: 1.5px solid #cfd8dc;
-    border-radius: 10px;
-    font-size: 0.92em;
-    outline: none;
-    background: #fafafa;
-  }
-
-  .add-user-row input:focus { border-color: #6c5ce7; }
-
-  .add-user-row select {
-    flex: 0 0 auto;
-    width: 100px;
-    padding: 10px 10px;
-    border: 1.5px solid #cfd8dc;
-    border-radius: 10px;
-    font-size: 0.92em;
-    outline: none;
-    background: #fafafa;
-    -webkit-appearance: none;
-    appearance: none;
-    text-align: center;
-    text-align-last: center;
-  }
-
-  .add-user-submit {
-    width: 100%;
-    padding: 9px;
-    background: linear-gradient(135deg, #66bb6a, #43a047);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 0.92em;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .add-user-submit:active { transform: scale(0.97); }
 
   /* 移动端微调 */
   @media (max-width: 480px) {
@@ -806,30 +688,7 @@
   </div>
 </div>
 
-<!-- 用户管理弹窗 -->
-<div class="modal-overlay" id="userModal">
-  <div class="modal-box" style="max-width:400px">
-    <h3>👥 用户管理</h3>
-    <div class="user-list" id="userList"></div>
-    <div class="add-user-form">
-      <h4>添加新用户</h4>
-      <div class="add-user-row">
-        <input type="text" id="newUsername" placeholder="用户名" maxlength="20">
-        <select id="newUserRole">
-          <option value="user">普通用户</option>
-          <option value="admin">管理员</option>
-        </select>
-      </div>
-      <div class="add-user-row">
-        <input type="text" id="newUserPassword" placeholder="密码（至少4位）" maxlength="30">
-      </div>
-      <button class="add-user-submit" onclick="addUser()">添加用户</button>
-    </div>
-    <div class="modal-actions" style="margin-top:14px">
-      <button class="modal-cancel" onclick="hideUserModal()">关闭</button>
-    </div>
-  </div>
-</div>
+
 
 <script>
 // ===== 登录验证 =====
@@ -883,19 +742,10 @@ function renderUserBar() {
   html += '</div>';
   infoEl.innerHTML = html;
 
-  // 两个按钮：用户管理 + 退出（所有用户都可见）
+  // 退出按钮
   var actHtml = '';
-  actHtml += '<button class="user-mgmt-btn" onclick="onUserMgmtClick()">👥 用户管理</button>';
   actHtml += '<button class="logout-btn" onclick="doLogout()">🚪 退出登录</button>';
   actionsEl.innerHTML = actHtml;
-}
-
-function onUserMgmtClick() {
-  if (currentRole === 'admin') {
-    showUserModal();
-  } else {
-    showToast('🔒 当前账号无管理权限\n如需添加用户请联系 wenxin');
-  }
 }
 
 function showToast(msg) {
@@ -930,117 +780,6 @@ function handleAuthError(status) {
     return true;
   }
   return false;
-}
-
-/* ========== 用户管理 ========== */
-
-function showUserModal() {
-  document.getElementById('userModal').classList.add('show');
-  loadUserList();
-}
-
-function hideUserModal() {
-  document.getElementById('userModal').classList.remove('show');
-}
-
-function loadUserList() {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/api/users', true);
-  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
-  xhr.onload = function() {
-    if (xhr.status === 200) {
-      try {
-        var users = JSON.parse(xhr.responseText);
-        renderUserList(users);
-      } catch(e) {}
-    }
-  };
-  xhr.send();
-}
-
-function renderUserList(users) {
-  var container = document.getElementById('userList');
-  container.innerHTML = '';
-
-  for (var i = 0; i < users.length; i++) {
-    var u = users[i];
-    var item = document.createElement('div');
-    item.className = 'user-list-item';
-
-    var left = document.createElement('div');
-    var nameSpan = document.createElement('span');
-    nameSpan.className = 'user-list-name';
-    nameSpan.textContent = u.username;
-    left.appendChild(nameSpan);
-
-    var roleSpan = document.createElement('span');
-    roleSpan.className = 'user-list-role ' + (u.role === 'admin' ? 'role-admin' : 'role-user');
-    roleSpan.textContent = u.role === 'admin' ? '管理员' : '普通用户';
-    left.appendChild(roleSpan);
-
-    item.appendChild(left);
-
-    if (u.username !== currentUser) {
-      var delBtn = document.createElement('button');
-      delBtn.className = 'user-list-del';
-      delBtn.textContent = '删除';
-      delBtn.setAttribute('onclick', 'deleteUser("' + u.username + '")');
-      item.appendChild(delBtn);
-    }
-
-    container.appendChild(item);
-  }
-}
-
-function addUser() {
-  var username = document.getElementById('newUsername').value.trim();
-  var password = document.getElementById('newUserPassword').value;
-  var role = document.getElementById('newUserRole').value;
-
-  if (!username) { alert('请输入用户名'); return; }
-  if (!password || password.length < 4) { alert('密码至少4个字符'); return; }
-
-  var xhr = new XMLHttpRequest();
-  xhr.open('POST', '/api/users', true);
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
-  xhr.onload = function() {
-    if (xhr.status === 200) {
-      document.getElementById('newUsername').value = '';
-      document.getElementById('newUserPassword').value = '';
-      loadUserList();
-    } else {
-      try {
-        var res = JSON.parse(xhr.responseText);
-        alert(res.error || '添加失败');
-      } catch(e) {
-        alert('添加失败');
-      }
-    }
-  };
-  xhr.send(JSON.stringify({ username: username, password: password, role: role }));
-}
-
-function deleteUser(username) {
-  if (!confirm('确定删除用户「' + username + '」吗？')) return;
-
-  var xhr = new XMLHttpRequest();
-  xhr.open('DELETE', '/api/users', true);
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
-  xhr.onload = function() {
-    if (xhr.status === 200) {
-      loadUserList();
-    } else {
-      try {
-        var res = JSON.parse(xhr.responseText);
-        alert(res.error || '删除失败');
-      } catch(e) {
-        alert('删除失败');
-      }
-    }
-  };
-  xhr.send(JSON.stringify({ username: username }));
 }
 
 // ===== 分类配置 =====

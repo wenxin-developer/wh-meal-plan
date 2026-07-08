@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家庭记账 - 我们的小日子</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(160deg, #fffbeb 0%, #fef3c7 50%, #fff7ed 100%);
+    min-height: 100vh;
+    padding: 0 16px 40px;
+  }
+
+  .nav-bar {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 16px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #546e7a;
+    font-size: 0.88em;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .back-btn:active { transform: scale(0.96); }
+
+  .page-title {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: #b45309;
+    flex: 1;
+  }
+
+  /* 月度汇总卡片 */
+  .summary-card {
+    max-width: 560px;
+    margin: 16px auto;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-radius: 20px;
+    padding: 24px;
+    color: #fff;
+    box-shadow: 0 6px 24px rgba(217,119,6,0.3);
+  }
+
+  .summary-month {
+    font-size: 0.88em;
+    opacity: 0.85;
+    margin-bottom: 12px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .summary-item {
+    text-align: center;
+    flex: 1;
+  }
+
+  .summary-label {
+    font-size: 0.78em;
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
+
+  .summary-value {
+    font-size: 1.6em;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .summary-value.income { color: #bbf7d0; }
+  .summary-value.expense { color: #fecaca; }
+
+  .summary-divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(255,255,255,0.3);
+    margin: 0 8px;
+  }
+
+  /* 添加记录 */
+  .add-section {
+    max-width: 560px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .type-toggle {
+    display: flex;
+    gap: 0;
+    margin-bottom: 14px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1.5px solid #e0e0e0;
+  }
+
+  .type-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: #fafafa;
+    font-size: 0.92em;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s;
+    color: #6b7280;
+  }
+
+  .type-btn.active-expense {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+
+  .type-btn.active-income {
+    background: #f0fdf4;
+    color: #16a34a;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+
+  .form-row input, .form-row select {
+    padding: 11px 14px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 0.92em;
+    outline: none;
+    background: #fafafa;
+    -webkit-appearance: none;
+  }
+
+  .form-row input:focus, .form-row select:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245,158,11,0.1);
+    background: #fff;
+  }
+
+  .form-row .amount-input {
+    flex: 0 0 120px;
+    font-weight: 700;
+    font-size: 1em;
+  }
+
+  .form-row .desc-input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .form-row select {
+    flex: 0 0 auto;
+    min-width: 80px;
+    appearance: none;
+    text-align: center;
+    text-align-last: center;
+  }
+
+  .add-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #fbbf24, #d97706);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(217,119,6,0.3);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    margin-top: 4px;
+  }
+
+  .add-btn:active { transform: scale(0.97); }
+
+  /* 记录列表 */
+  .records-section {
+    max-width: 560px;
+    margin: 20px auto;
+  }
+
+  .section-label {
+    font-size: 0.88em;
+    font-weight: 600;
+    color: #78909c;
+    margin-bottom: 12px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-label .count {
+    background: #fef3c7;
+    color: #b45309;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.85em;
+  }
+
+  .record-list {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  .record-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid #f5f5f5;
+    gap: 12px;
+  }
+
+  .record-item:last-child { border-bottom: none; }
+
+  .record-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    flex-shrink: 0;
+  }
+
+  .record-icon.expense { background: #fef2f2; }
+  .record-icon.income { background: #f0fdf4; }
+
+  .record-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .record-desc {
+    font-size: 0.92em;
+    font-weight: 500;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .record-meta {
+    display: flex;
+    gap: 8px;
+    margin-top: 3px;
+    font-size: 0.75em;
+    color: #9ca3af;
+  }
+
+  .record-amount {
+    font-size: 1em;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .record-amount.expense { color: #dc2626; }
+  .record-amount.income { color: #16a34a; }
+
+  .record-del {
+    background: none;
+    border: none;
+    color: #e0e0e0;
+    font-size: 1.1em;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .record-del:hover { color: #e53935; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #d1d5db;
+  }
+
+  .empty-state .emoji { font-size: 2.5em; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.92em; color: #9ca3af; }
+
+  @media (max-width: 480px) {
+    body { padding: 0 10px 32px; }
+    .summary-value { font-size: 1.3em; }
+    .form-row { flex-wrap: wrap; }
+    .form-row .amount-input { flex: 1 1 100px; }
+    .record-item { padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a class="back-btn" href="/">← 返回</a>
+  <span class="page-title">💰 家庭记账</span>
+</div>
+
+<!-- 月度汇总 -->
+<div class="summary-card">
+  <div class="summary-month" id="summaryMonth"></div>
+  <div class="summary-row">
+    <div class="summary-item">
+      <div class="summary-label">收入</div>
+      <div class="summary-value income" id="totalIncome">0</div>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="summary-item">
+      <div class="summary-label">支出</div>
+      <div class="summary-value expense" id="totalExpense">0</div>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="summary-item">
+      <div class="summary-label">结余</div>
+      <div class="summary-value" id="totalBalance">0</div>
+    </div>
+  </div>
+</div>
+
+<!-- 添加记录 -->
+<div class="add-section">
+  <div class="type-toggle">
+    <button class="type-btn active-expense" id="btnExpense" onclick="switchType('expense')">支出</button>
+    <button class="type-btn" id="btnIncome" onclick="switchType('income')">收入</button>
+  </div>
+  <div class="form-row">
+    <input type="number" class="amount-input" id="amountInput" placeholder="金额" step="0.01" min="0">
+    <select id="categorySelect">
+      <option value="餐饮">🍜 餐饮</option>
+      <option value="购物">🛒 购物</option>
+      <option value="交通">🚗 交通</option>
+      <option value="住房">🏠 住房</option>
+      <option value="娱乐">🎮 娱乐</option>
+      <option value="医疗">🏥 医疗</option>
+      <option value="教育">📚 教育</option>
+      <option value="其他">📦 其他</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <input type="text" class="desc-input" id="descInput" placeholder="备注（可选）" maxlength="50">
+  </div>
+  <button class="add-btn" onclick="addRecord()">记一笔</button>
+</div>
+
+<!-- 记录列表 -->
+<div class="records-section">
+  <div class="section-label">
+    本月记录 <span class="count" id="recordCount">0</span>
+  </div>
+  <div class="record-list" id="recordList"></div>
+</div>
+
+<script>
+var currentUser = null;
+var authToken = null;
+var records = [];
+var currentType = 'expense';
+
+var categoryIcons = {
+  '餐饮': '🍜', '购物': '🛒', '交通': '🚗', '住房': '🏠',
+  '娱乐': '🎮', '医疗': '🏥', '教育': '📚', '其他': '📦',
+  '工资': '💼', '奖金': '🎁', '理财': '📈', '副业': '💻'
+};
+
+(function checkAuth() {
+  var token = localStorage.getItem('wh_token');
+  if (!token) { window.location.href = '/login.html'; return; }
+  try {
+    var decoded = decodeURIComponent(escape(atob(token)));
+    var parts = decoded.split(':');
+    if (parts.length >= 3 && parts[0] && parts[1]) {
+      currentUser = parts[0];
+      authToken = token;
+    } else {
+      localStorage.removeItem('wh_token');
+      window.location.href = '/login.html';
+      return;
+    }
+  } catch(e) {
+    localStorage.removeItem('wh_token');
+    window.location.href = '/login.html';
+    return;
+  }
+  initPage();
+})();
+
+function initPage() {
+  var now = new Date();
+  document.getElementById('summaryMonth').textContent = now.getFullYear() + '年' + (now.getMonth()+1) + '月 收支概览';
+  loadRecords();
+}
+
+function switchType(type) {
+  currentType = type;
+  var btnE = document.getElementById('btnExpense');
+  var btnI = document.getElementById('btnIncome');
+  var catSelect = document.getElementById('categorySelect');
+
+  btnE.className = 'type-btn' + (type === 'expense' ? ' active-expense' : '');
+  btnI.className = 'type-btn' + (type === 'income' ? ' active-income' : '');
+
+  if (type === 'income') {
+    catSelect.innerHTML = '<option value="工资">💼 工资</option><option value="奖金">🎁 奖金</option><option value="理财">📈 理财</option><option value="副业">💻 副业</option><option value="其他">📦 其他</option>';
+  } else {
+    catSelect.innerHTML = '<option value="餐饮">🍜 餐饮</option><option value="购物">🛒 购物</option><option value="交通">🚗 交通</option><option value="住房">🏠 住房</option><option value="娱乐">🎮 娱乐</option><option value="医疗">🏥 医疗</option><option value="教育">📚 教育</option><option value="其他">📦 其他</option>';
+  }
+}
+
+function addRecord() {
+  var amount = parseFloat(document.getElementById('amountInput').value);
+  if (!amount || amount <= 0) { alert('请输入有效金额'); return; }
+
+  var category = document.getElementById('categorySelect').value;
+  var desc = document.getElementById('descInput').value.trim();
+
+  var record = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    type: currentType,
+    amount: amount,
+    category: category,
+    desc: desc || category,
+    author: currentUser,
+    createdAt: new Date().toISOString()
+  };
+
+  records.unshift(record);
+  document.getElementById('amountInput').value = '';
+  document.getElementById('descInput').value = '';
+  saveRecords();
+  renderRecords();
+}
+
+function deleteRecord(id) {
+  if (!confirm('确定删除这条记录吗？')) return;
+  records = records.filter(function(r) { return r.id !== id; });
+  saveRecords();
+  renderRecords();
+}
+
+function renderRecords() {
+  var now = new Date();
+  var thisMonth = records.filter(function(r) {
+    var d = new Date(r.createdAt);
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  });
+
+  // 汇总
+  var income = 0, expense = 0;
+  for (var i = 0; i < thisMonth.length; i++) {
+    if (thisMonth[i].type === 'income') income += thisMonth[i].amount;
+    else expense += thisMonth[i].amount;
+  }
+
+  document.getElementById('totalIncome').textContent = income.toFixed(0);
+  document.getElementById('totalExpense').textContent = expense.toFixed(0);
+  var balance = income - expense;
+  document.getElementById('totalBalance').textContent = (balance >= 0 ? '+' : '') + balance.toFixed(0);
+
+  document.getElementById('recordCount').textContent = thisMonth.length;
+
+  var container = document.getElementById('recordList');
+  if (thisMonth.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="emoji">💰</div><p>本月还没有记录</p></div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < thisMonth.length; i++) {
+    var r = thisMonth[i];
+    var d = new Date(r.createdAt);
+    var dateStr = (d.getMonth()+1) + '/' + d.getDate();
+    var icon = categoryIcons[r.category] || '📦';
+    var sign = r.type === 'income' ? '+' : '-';
+
+    html += '<div class="record-item">';
+    html += '<div class="record-icon ' + r.type + '">' + icon + '</div>';
+    html += '<div class="record-info">';
+    html += '<div class="record-desc">' + escapeHtml(r.desc) + '</div>';
+    html += '<div class="record-meta"><span>' + dateStr + '</span><span>' + r.category + '</span><span>' + r.author + '</span></div>';
+    html += '</div>';
+    html += '<div class="record-amount ' + r.type + '">' + sign + r.amount.toFixed(2) + '</div>';
+    html += '<button class="record-del" onclick="deleteRecord(\'' + r.id + '\')">×</button>';
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function loadRecords() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/api/finance', true);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
+  xhr.onload = function() {
+    if (xhr.status === 401) {
+      localStorage.removeItem('wh_token');
+      window.location.href = '/login.html';
+      return;
+    }
+    if (xhr.status === 200) {
+      try {
+        records = JSON.parse(xhr.responseText);
+        if (!Array.isArray(records)) records = [];
+      } catch(e) { records = []; }
+    }
+    renderRecords();
+  };
+  xhr.onerror = function() { renderRecords(); };
+  xhr.send();
+}
+
+function saveRecords() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/finance', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
+  xhr.send(JSON.stringify(records));
+}
+</script>
+
+</body>
+</html>
