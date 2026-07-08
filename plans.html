@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>周末计划 - WH 家庭生活</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 50%, #fce4ec 100%);
+    min-height: 100vh;
+    padding: 0 16px 40px;
+  }
+
+  .nav-bar {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #546e7a;
+    font-size: 0.88em;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .back-btn:active { transform: scale(0.96); }
+
+  .page-title {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #1565c0;
+    flex: 1;
+  }
+
+  /* 倒计时卡片 */
+  .countdown-card {
+    max-width: 640px;
+    margin: 16px auto;
+    background: linear-gradient(135deg, #1565c0, #42a5f5);
+    border-radius: 20px;
+    padding: 24px;
+    color: #fff;
+    box-shadow: 0 6px 24px rgba(21,101,192,0.3);
+    text-align: center;
+  }
+
+  .countdown-label {
+    font-size: 0.88em;
+    opacity: 0.85;
+    margin-bottom: 8px;
+  }
+
+  .countdown-days {
+    font-size: 3em;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .countdown-unit {
+    font-size: 0.9em;
+    opacity: 0.8;
+  }
+
+  .countdown-next {
+    margin-top: 12px;
+    font-size: 0.88em;
+    opacity: 0.9;
+  }
+
+  /* 添加计划按钮 */
+  .add-plan-btn {
+    max-width: 640px;
+    margin: 20px auto;
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: #fff;
+    border: 2px dashed #90caf9;
+    border-radius: 16px;
+    font-size: 1em;
+    font-weight: 600;
+    color: #1565c0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: all 0.15s;
+  }
+
+  .add-plan-btn:active { transform: scale(0.98); background: #e3f2fd; }
+
+  /* 计划卡片列表 */
+  .plans-section {
+    max-width: 640px;
+    margin: 20px auto;
+  }
+
+  .section-label {
+    font-size: 0.88em;
+    font-weight: 600;
+    color: #78909c;
+    margin-bottom: 12px;
+    padding-left: 4px;
+  }
+
+  .plan-card {
+    background: #fff;
+    border-radius: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+    transition: transform 0.15s;
+  }
+
+  .plan-card:active { transform: scale(0.99); }
+
+  .plan-card-header {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .plan-date-block {
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 8px;
+    background: linear-gradient(135deg, #1565c0, #42a5f5);
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .plan-date-month {
+    font-size: 0.75em;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+
+  .plan-date-day {
+    font-size: 1.8em;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .plan-date-weekday {
+    font-size: 0.72em;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+
+  .plan-info {
+    flex: 1;
+    padding: 16px;
+    min-width: 0;
+  }
+
+  .plan-title {
+    font-size: 1.05em;
+    font-weight: 700;
+    color: #37474f;
+    margin-bottom: 6px;
+    word-break: break-word;
+  }
+
+  .plan-destination {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85em;
+    color: #1565c0;
+    background: #e3f2fd;
+    padding: 3px 10px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+
+  .plan-activities {
+    font-size: 0.85em;
+    color: #78909c;
+    line-height: 1.6;
+  }
+
+  .plan-notes {
+    margin-top: 8px;
+    font-size: 0.82em;
+    color: #90a4ae;
+    font-style: italic;
+    border-top: 1px dashed #eceff1;
+    padding-top: 8px;
+  }
+
+  .plan-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border-top: 1px solid #f5f5f5;
+  }
+
+  .plan-author {
+    font-size: 0.78em;
+    color: #b0bec5;
+  }
+
+  .plan-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .plan-actions button {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    font-weight: 500;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .plan-done-btn {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .plan-done-btn:active { background: #c8e6c9; }
+
+  .plan-del-btn {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  .plan-del-btn:active { background: #ffcdd2; }
+
+  .plan-card.completed {
+    opacity: 0.6;
+  }
+
+  .plan-card.completed .plan-date-block {
+    background: linear-gradient(135deg, #90a4ae, #b0bec5);
+  }
+
+  .plan-card.completed .plan-title {
+    text-decoration: line-through;
+    color: #90a4ae;
+  }
+
+  /* 弹窗 */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal-box {
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .modal-box h3 {
+    margin-bottom: 18px;
+    color: #1565c0;
+    font-size: 1.15em;
+    text-align: center;
+  }
+
+  .modal-box label {
+    display: block;
+    font-size: 0.88em;
+    color: #546e7a;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .modal-box input,
+  .modal-box textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #cfd8dc;
+    border-radius: 12px;
+    font-size: 0.95em;
+    margin-bottom: 14px;
+    outline: none;
+    background: #fafafa;
+    -webkit-appearance: none;
+    font-family: inherit;
+  }
+
+  .modal-box textarea {
+    min-height: 70px;
+    resize: vertical;
+  }
+
+  .modal-box input:focus,
+  .modal-box textarea:focus {
+    border-color: #1565c0;
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.1);
+    background: #fff;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .modal-actions button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .modal-cancel {
+    background: #eceff1;
+    color: #546e7a;
+  }
+
+  .modal-confirm {
+    background: linear-gradient(135deg, #1565c0, #42a5f5);
+    color: #fff;
+  }
+
+  .modal-confirm:active { transform: scale(0.97); }
+
+  /* 空状态 */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #b0bec5;
+  }
+
+  .empty-state .emoji { font-size: 2.5em; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.92em; }
+
+  /* 过去计划 */
+  .past-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88em;
+    font-weight: 500;
+    color: #90a4ae;
+    cursor: pointer;
+    padding: 8px 4px;
+    margin-top: 16px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .past-list { display: none; margin-top: 12px; }
+  .past-list.show { display: block; }
+
+  @media (max-width: 480px) {
+    body { padding: 0 10px 32px; }
+    .plan-date-block { width: 68px; padding: 12px 6px; }
+    .plan-date-day { font-size: 1.5em; }
+    .plan-info { padding: 12px; }
+    .countdown-days { font-size: 2.5em; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a class="back-btn" href="/">← 返回</a>
+  <span class="page-title">🗓️ 周末计划</span>
+</div>
+
+<!-- 倒计时 -->
+<div class="countdown-card" id="countdownCard">
+  <div class="countdown-label" id="countdownLabel">距离下一个周末</div>
+  <div class="countdown-days" id="countdownDays">-</div>
+  <div class="countdown-unit">天</div>
+  <div class="countdown-next" id="countdownDate"></div>
+</div>
+
+<!-- 添加计划 -->
+<button class="add-plan-btn" onclick="showAddPlan()">＋ 添加新计划</button>
+
+<!-- 即将到来的计划 -->
+<div class="plans-section">
+  <div class="section-label">📌 即将到来的计划</div>
+  <div id="upcomingPlans"></div>
+</div>
+
+<!-- 过去的计划 -->
+<div class="plans-section">
+  <div class="past-toggle" onclick="togglePast()">
+    <span id="pastArrow">▶</span> 过去的计划
+  </div>
+  <div class="past-list" id="pastList">
+    <div id="pastPlans"></div>
+  </div>
+</div>
+
+<!-- 添加计划弹窗 -->
+<div class="modal-overlay" id="planModal">
+  <div class="modal-box">
+    <h3>🗓️ 添加周末计划</h3>
+    <label>日期</label>
+    <input type="date" id="planDate">
+    <label>计划标题</label>
+    <input type="text" id="planTitle" placeholder="例如：去青城山爬山" maxlength="50">
+    <label>目的地</label>
+    <input type="text" id="planDest" placeholder="例如：青城山" maxlength="30">
+    <label>活动安排</label>
+    <textarea id="planActivities" placeholder="例如：早上出发，中午野餐，下午爬山..."></textarea>
+    <label>备注（可选）</label>
+    <input type="text" id="planNotes" placeholder="需要带的东西、注意事项等" maxlength="100">
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="hideAddPlan()">取消</button>
+      <button class="modal-confirm" onclick="confirmAddPlan()">添加计划</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var currentUser = null;
+var authToken = null;
+var plans = [];
+
+(function checkAuth() {
+  var token = localStorage.getItem('wh_token');
+  if (!token) { window.location.href = '/login.html'; return; }
+  try {
+    var decoded = decodeURIComponent(escape(atob(token)));
+    var parts = decoded.split(':');
+    if (parts.length >= 3 && parts[0] && parts[1]) {
+      currentUser = parts[0];
+      authToken = token;
+    } else {
+      localStorage.removeItem('wh_token');
+      window.location.href = '/login.html';
+      return;
+    }
+  } catch(e) {
+    localStorage.removeItem('wh_token');
+    window.location.href = '/login.html';
+    return;
+  }
+  initPage();
+})();
+
+function initPage() {
+  updateCountdown();
+  loadPlans();
+  // 默认日期设为下一个周末
+  var nextWeekend = getNextWeekend();
+  document.getElementById('planDate').value = formatDateISO(nextWeekend);
+}
+
+function getNextWeekend() {
+  var now = new Date();
+  var day = now.getDay(); // 0=Sun, 6=Sat
+  var daysUntilSat = (6 - day + 7) % 7;
+  if (daysUntilSat === 0 && now.getHours() >= 18) daysUntilSat = 7; // 如果周六晚上过了，算下个周末
+  var sat = new Date(now);
+  sat.setDate(sat.getDate() + daysUntilSat);
+  return sat;
+}
+
+function updateCountdown() {
+  var nextWeekend = getNextWeekend();
+  var now = new Date();
+  var diff = Math.ceil((nextWeekend - now) / (1000 * 60 * 60 * 24));
+  if (diff < 0) diff = 0;
+
+  document.getElementById('countdownDays').textContent = diff;
+
+  var weekdays = ['周日','周一','周二','周三','周四','周五','周六'];
+  var dateStr = (nextWeekend.getMonth()+1) + '月' + nextWeekend.getDate() + '日 ' + weekdays[nextWeekend.getDay()];
+  document.getElementById('countdownDate').textContent = dateStr;
+
+  if (diff === 0) {
+    document.getElementById('countdownLabel').textContent = '🎉 今天就是周末！';
+    document.getElementById('countdownDays').textContent = '🎊';
+    document.querySelector('.countdown-unit').textContent = '';
+  } else if (diff === 1) {
+    document.getElementById('countdownLabel').textContent = '明天就是周末啦！';
+  }
+}
+
+function formatDateISO(d) {
+  var y = d.getFullYear();
+  var m = ('0' + (d.getMonth()+1)).slice(-2);
+  var day = ('0' + d.getDate()).slice(-2);
+  return y + '-' + m + '-' + day;
+}
+
+function showAddPlan() {
+  document.getElementById('planModal').classList.add('show');
+  document.getElementById('planTitle').value = '';
+  document.getElementById('planDest').value = '';
+  document.getElementById('planActivities').value = '';
+  document.getElementById('planNotes').value = '';
+  document.getElementById('planTitle').focus();
+}
+
+function hideAddPlan() {
+  document.getElementById('planModal').classList.remove('show');
+}
+
+function confirmAddPlan() {
+  var date = document.getElementById('planDate').value;
+  var title = document.getElementById('planTitle').value.trim();
+  var dest = document.getElementById('planDest').value.trim();
+  var activities = document.getElementById('planActivities').value.trim();
+  var notes = document.getElementById('planNotes').value.trim();
+
+  if (!date) { alert('请选择日期'); return; }
+  if (!title) { alert('请输入计划标题'); return; }
+
+  var plan = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    date: date,
+    title: title,
+    destination: dest,
+    activities: activities,
+    notes: notes,
+    done: false,
+    author: currentUser,
+    createdAt: new Date().toISOString()
+  };
+
+  plans.push(plan);
+  plans.sort(function(a,b) { return a.date.localeCompare(b.date); });
+  savePlans();
+  renderPlans();
+  hideAddPlan();
+}
+
+function togglePlanDone(id) {
+  for (var i = 0; i < plans.length; i++) {
+    if (plans[i].id === id) {
+      plans[i].done = !plans[i].done;
+      break;
+    }
+  }
+  savePlans();
+  renderPlans();
+}
+
+function deletePlan(id) {
+  if (!confirm('确定删除这个计划吗？')) return;
+  plans = plans.filter(function(p) { return p.id !== id; });
+  savePlans();
+  renderPlans();
+}
+
+function togglePast() {
+  var list = document.getElementById('pastList');
+  var arrow = document.getElementById('pastArrow');
+  list.classList.toggle('show');
+  arrow.textContent = list.classList.contains('show') ? '▼' : '▶';
+}
+
+function renderPlans() {
+  var today = formatDateISO(new Date());
+  var upcoming = plans.filter(function(p) { return p.date >= today && !p.done; });
+  var past = plans.filter(function(p) { return p.date < today || p.done; });
+
+  // 即将到来的
+  var upEl = document.getElementById('upcomingPlans');
+  if (upcoming.length === 0) {
+    upEl.innerHTML = '<div class="empty-state"><div class="emoji">🏖️</div><p>还没有计划，添加一个周末出行吧！</p></div>';
+  } else {
+    upEl.innerHTML = upcoming.map(function(p) { return renderPlanCard(p); }).join('');
+  }
+
+  // 过去的
+  var pastEl = document.getElementById('pastPlans');
+  if (past.length === 0) {
+    pastEl.innerHTML = '<div class="empty-state"><p>还没有过去的计划</p></div>';
+  } else {
+    pastEl.innerHTML = past.map(function(p) { return renderPlanCard(p); }).join('');
+  }
+}
+
+function renderPlanCard(p) {
+  var d = new Date(p.date + 'T00:00:00');
+  var months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  var weekdays = ['周日','周一','周二','周三','周四','周五','周六'];
+
+  var doneClass = p.done ? ' completed' : '';
+  var doneBtnText = p.done ? '恢复' : '完成';
+
+  var html = '<div class="plan-card' + doneClass + '">';
+  html += '<div class="plan-card-header">';
+  html += '<div class="plan-date-block">';
+  html += '<div class="plan-date-month">' + months[d.getMonth()] + '</div>';
+  html += '<div class="plan-date-day">' + d.getDate() + '</div>';
+  html += '<div class="plan-date-weekday">' + weekdays[d.getDay()] + '</div>';
+  html += '</div>';
+  html += '<div class="plan-info">';
+  html += '<div class="plan-title">' + escapeHtml(p.title) + '</div>';
+  if (p.destination) {
+    html += '<div class="plan-destination">📍 ' + escapeHtml(p.destination) + '</div>';
+  }
+  if (p.activities) {
+    html += '<div class="plan-activities">' + escapeHtml(p.activities).replace(/\n/g, '<br>') + '</div>';
+  }
+  if (p.notes) {
+    html += '<div class="plan-notes">💡 ' + escapeHtml(p.notes) + '</div>';
+  }
+  html += '</div></div>';
+  html += '<div class="plan-card-footer">';
+  html += '<span class="plan-author">' + p.author + ' 创建</span>';
+  html += '<div class="plan-actions">';
+  html += '<button class="plan-done-btn" onclick="togglePlanDone(\'' + p.id + '\')">' + doneBtnText + '</button>';
+  html += '<button class="plan-del-btn" onclick="deletePlan(\'' + p.id + '\')">删除</button>';
+  html += '</div></div></div>';
+
+  return html;
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function loadPlans() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/api/plans', true);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
+  xhr.onload = function() {
+    if (xhr.status === 401) {
+      localStorage.removeItem('wh_token');
+      window.location.href = '/login.html';
+      return;
+    }
+    if (xhr.status === 200) {
+      try {
+        plans = JSON.parse(xhr.responseText);
+        if (!Array.isArray(plans)) plans = [];
+      } catch(e) { plans = []; }
+    }
+    renderPlans();
+  };
+  xhr.onerror = function() { renderPlans(); };
+  xhr.send();
+}
+
+function savePlans() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/plans', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
+  xhr.send(JSON.stringify(plans));
+}
+</script>
+
+</body>
+</html>

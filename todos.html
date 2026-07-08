@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家庭待办 - WH 家庭生活</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 50%, #fff8e1 100%);
+    min-height: 100vh;
+    padding: 0 16px 40px;
+  }
+
+  /* 顶部导航 */
+  .nav-bar {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #546e7a;
+    font-size: 0.88em;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .back-btn:active { transform: scale(0.96); }
+
+  .page-title {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #2e7d32;
+    flex: 1;
+  }
+
+  /* 添加区域 */
+  .add-section {
+    max-width: 640px;
+    margin: 16px auto;
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .add-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .add-row input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 0.95em;
+    outline: none;
+    background: #fafafa;
+    -webkit-appearance: none;
+  }
+
+  .add-row input:focus {
+    border-color: #4caf50;
+    box-shadow: 0 0 0 3px rgba(76,175,80,0.1);
+    background: #fff;
+  }
+
+  .add-row select {
+    padding: 12px 10px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 0.88em;
+    outline: none;
+    background: #fafafa;
+    -webkit-appearance: none;
+    appearance: none;
+    text-align: center;
+    text-align-last: center;
+    min-width: 80px;
+  }
+
+  .add-btn {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(76,175,80,0.3);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    white-space: nowrap;
+  }
+
+  .add-btn:active { transform: scale(0.96); }
+
+  /* 待办列表 */
+  .todo-section {
+    max-width: 640px;
+    margin: 20px auto;
+  }
+
+  .section-label {
+    font-size: 0.88em;
+    font-weight: 600;
+    color: #78909c;
+    margin-bottom: 10px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-label .count {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.85em;
+  }
+
+  .todo-list {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  .todo-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f5f5f5;
+    gap: 12px;
+    transition: background 0.15s;
+  }
+
+  .todo-item:last-child { border-bottom: none; }
+  .todo-item:active { background: #f9fbe7; }
+
+  .todo-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #c8e6c9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .todo-check.done {
+    background: #4caf50;
+    border-color: #4caf50;
+  }
+
+  .todo-check.done::after {
+    content: '✓';
+    color: #fff;
+    font-size: 0.8em;
+    font-weight: 700;
+  }
+
+  .todo-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .todo-text {
+    font-size: 0.95em;
+    color: #37474f;
+    font-weight: 500;
+    word-break: break-word;
+  }
+
+  .todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: #b0bec5;
+  }
+
+  .todo-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .todo-priority {
+    font-size: 0.72em;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  .priority-high { background: #ffebee; color: #c62828; }
+  .priority-medium { background: #fff3e0; color: #e65100; }
+  .priority-low { background: #e8f5e9; color: #2e7d32; }
+
+  .todo-date {
+    font-size: 0.75em;
+    color: #b0bec5;
+  }
+
+  .todo-author {
+    font-size: 0.75em;
+    color: #90a4ae;
+  }
+
+  .todo-del {
+    background: none;
+    border: none;
+    color: #e0e0e0;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s;
+  }
+
+  .todo-del:hover { color: #e53935; }
+  .todo-del:active { background: #ffebee; }
+
+  /* 空状态 */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #b0bec5;
+  }
+
+  .empty-state .emoji { font-size: 2.5em; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.92em; }
+
+  /* 已完成区域 */
+  .done-section {
+    max-width: 640px;
+    margin: 24px auto;
+  }
+
+  .done-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88em;
+    font-weight: 500;
+    color: #90a4ae;
+    cursor: pointer;
+    padding: 8px 4px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .done-toggle:active { opacity: 0.7; }
+
+  .done-list {
+    margin-top: 10px;
+    display: none;
+  }
+
+  .done-list.show { display: block; }
+
+  .done-list .todo-item {
+    opacity: 0.6;
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 0 10px 32px; }
+    .add-row { flex-wrap: wrap; }
+    .add-row input { min-width: 0; }
+    .add-row select { flex: 0 0 auto; }
+    .todo-item { padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a class="back-btn" href="/">← 返回</a>
+  <span class="page-title">✅ 家庭待办</span>
+</div>
+
+<!-- 添加待办 -->
+<div class="add-section">
+  <div class="add-row">
+    <input type="text" id="todoInput" placeholder="输入待办事项..." maxlength="100">
+    <select id="prioritySelect">
+      <option value="medium">一般</option>
+      <option value="high">紧急</option>
+      <option value="low">不急</option>
+    </select>
+    <button class="add-btn" onclick="addTodo()">添加</button>
+  </div>
+</div>
+
+<!-- 待完成 -->
+<div class="todo-section" id="pendingSection">
+  <div class="section-label">
+    待完成 <span class="count" id="pendingCount">0</span>
+  </div>
+  <div class="todo-list" id="pendingList"></div>
+</div>
+
+<!-- 已完成 -->
+<div class="done-section" id="doneSection">
+  <div class="done-toggle" onclick="toggleDone()">
+    <span id="doneArrow">▶</span> 已完成 <span id="doneCount">0</span>
+  </div>
+  <div class="done-list" id="doneList">
+    <div class="todo-list" id="doneListInner"></div>
+  </div>
+</div>
+
+<script>
+var currentUser = null;
+var authToken = null;
+var todos = [];
+
+(function checkAuth() {
+  var token = localStorage.getItem('wh_token');
+  if (!token) { window.location.href = '/login.html'; return; }
+  try {
+    var decoded = decodeURIComponent(escape(atob(token)));
+    var parts = decoded.split(':');
+    if (parts.length >= 3 && parts[0] && parts[1]) {
+      currentUser = parts[0];
+      authToken = token;
+    } else {
+      localStorage.removeItem('wh_token');
+      window.location.href = '/login.html';
+      return;
+    }
+  } catch(e) {
+    localStorage.removeItem('wh_token');
+    window.location.href = '/login.html';
+    return;
+  }
+  loadTodos();
+})();
+
+// Enter 键添加
+document.getElementById('todoInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') addTodo();
+});
+
+function addTodo() {
+  var input = document.getElementById('todoInput');
+  var text = input.value.trim();
+  if (!text) return;
+
+  var priority = document.getElementById('prioritySelect').value;
+
+  var todo = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    text: text,
+    priority: priority,
+    done: false,
+    author: currentUser,
+    createdAt: new Date().toISOString()
+  };
+
+  todos.unshift(todo);
+  input.value = '';
+  saveTodos();
+  renderTodos();
+}
+
+function toggleTodo(id) {
+  for (var i = 0; i < todos.length; i++) {
+    if (todos[i].id === id) {
+      todos[i].done = !todos[i].done;
+      if (todos[i].done) {
+        todos[i].doneAt = new Date().toISOString();
+      } else {
+        delete todos[i].doneAt;
+      }
+      break;
+    }
+  }
+  saveTodos();
+  renderTodos();
+}
+
+function deleteTodo(id) {
+  todos = todos.filter(function(t) { return t.id !== id; });
+  saveTodos();
+  renderTodos();
+}
+
+function toggleDone() {
+  var list = document.getElementById('doneList');
+  var arrow = document.getElementById('doneArrow');
+  list.classList.toggle('show');
+  arrow.textContent = list.classList.contains('show') ? '▼' : '▶';
+}
+
+function renderTodos() {
+  var pending = todos.filter(function(t) { return !t.done; });
+  var done = todos.filter(function(t) { return t.done; });
+
+  document.getElementById('pendingCount').textContent = pending.length;
+  document.getElementById('doneCount').textContent = done.length;
+
+  // 待完成
+  var pendingEl = document.getElementById('pendingList');
+  if (pending.length === 0) {
+    pendingEl.innerHTML = '<div class="empty-state"><div class="emoji">🎉</div><p>没有待办事项，太棒了！</p></div>';
+  } else {
+    pendingEl.innerHTML = pending.map(function(t) { return renderTodoItem(t); }).join('');
+  }
+
+  // 已完成
+  var doneEl = document.getElementById('doneListInner');
+  if (done.length === 0) {
+    doneEl.innerHTML = '<div class="empty-state"><p>还没有已完成的事项</p></div>';
+  } else {
+    doneEl.innerHTML = done.map(function(t) { return renderTodoItem(t); }).join('');
+  }
+}
+
+function renderTodoItem(t) {
+  var priorityLabels = { high: '紧急', medium: '一般', low: '不急' };
+  var priorityClass = 'priority-' + t.priority;
+  var doneClass = t.done ? ' completed' : '';
+  var checkClass = t.done ? ' done' : '';
+
+  var dateStr = '';
+  if (t.createdAt) {
+    var d = new Date(t.createdAt);
+    dateStr = (d.getMonth()+1) + '/' + d.getDate() + ' ' + ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
+  }
+
+  return '<div class="todo-item' + doneClass + '">' +
+    '<div class="todo-check' + checkClass + '" onclick="toggleTodo(\'' + t.id + '\')"></div>' +
+    '<div class="todo-content">' +
+      '<div class="todo-text">' + escapeHtml(t.text) + '</div>' +
+      '<div class="todo-meta">' +
+        '<span class="todo-priority ' + priorityClass + '">' + priorityLabels[t.priority] + '</span>' +
+        '<span class="todo-date">' + dateStr + '</span>' +
+        '<span class="todo-author">' + t.author + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<button class="todo-del" onclick="deleteTodo(\'' + t.id + '\')">×</button>' +
+  '</div>';
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function loadTodos() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/api/todos', true);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
+  xhr.onload = function() {
+    if (xhr.status === 401) {
+      localStorage.removeItem('wh_token');
+      window.location.href = '/login.html';
+      return;
+    }
+    if (xhr.status === 200) {
+      try {
+        todos = JSON.parse(xhr.responseText);
+        if (!Array.isArray(todos)) todos = [];
+      } catch(e) { todos = []; }
+    }
+    renderTodos();
+  };
+  xhr.onerror = function() { renderTodos(); };
+  xhr.send();
+}
+
+function saveTodos() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/todos', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
+  xhr.send(JSON.stringify(todos));
+}
+</script>
+
+</body>
+</html>
