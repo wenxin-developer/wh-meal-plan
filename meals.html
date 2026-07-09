@@ -467,101 +467,7 @@
     color: #fff;
   }
 
-  /* ---- 用户栏 ---- */
-  .user-bar {
-    max-width: 640px;
-    margin: 0 auto 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 16px;
-    background: #fff;
-    border-radius: 14px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  }
 
-  .user-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .user-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #6c5ce7, #0984e3);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.95em;
-    font-weight: 700;
-    flex-shrink: 0;
-    letter-spacing: 0;
-  }
-
-  .user-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .user-name {
-    font-size: 0.92em;
-    font-weight: 600;
-    color: #37474f;
-    line-height: 1.2;
-  }
-
-  .user-role-tag {
-    display: inline-block;
-    font-size: 0.72em;
-    padding: 1px 8px;
-    border-radius: 10px;
-    font-weight: 600;
-    line-height: 1.6;
-    width: fit-content;
-  }
-
-  .role-tag-admin { background: #fff3e0; color: #e65100; }
-  .role-tag-user  { background: #e8f5e9; color: #2e7d32; }
-
-  .user-actions {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  .user-actions button {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    border: 1.5px solid #e0e0e0;
-    background: #fafafa;
-    font-size: 0.82em;
-    font-weight: 500;
-    color: #546e7a;
-    cursor: pointer;
-    padding: 7px 14px;
-    border-radius: 20px;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-
-  .user-actions button:active { transform: scale(0.96); }
-
-  .user-actions .logout-btn {
-    border-color: #ffcdd2;
-    background: #fff5f5;
-    color: #c62828;
-  }
-
-  .user-actions .logout-btn:hover {
-    background: #ffebee;
-  }
 
   /* ---- Toast 提示 ---- */
   .toast-overlay {
@@ -605,9 +511,7 @@
     .section { margin: 12px auto; }
     .section-body { padding: 10px 14px 14px; gap: 8px; grid-template-columns: repeat(3, 1fr); }
     .item { padding: 7px 2px; font-size: 0.85em; }
-    .user-bar { padding: 8px 12px; }
-    .user-avatar { width: 32px; height: 32px; font-size: 0.85em; }
-    .user-actions button { padding: 6px 10px; font-size: 0.78em; }
+
   }
 </style>
 </head>
@@ -624,11 +528,7 @@
   <a href="/" style="display:inline-flex;align-items:center;gap:6px;color:#546e7a;font-size:0.9em;font-weight:500;text-decoration:none;padding:8px 16px;background:rgba(255,255,255,0.8);border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">← 返回首页</a>
 </div>
 
-<!-- 用户栏 -->
-<div class="user-bar" id="userBar">
-  <div class="user-info" id="userInfo"></div>
-  <div class="user-actions" id="userActions"></div>
-</div>
+
 
 <!-- 管理栏（管理按钮 + 添加菜品按钮 同行） -->
 <div class="manage-bar">
@@ -692,8 +592,6 @@
 
 <script>
 // ===== 登录验证 =====
-var currentUser = null;
-var currentRole = null;
 var authToken = null;
 
 (function checkAuth() {
@@ -706,8 +604,6 @@ var authToken = null;
     var decoded = decodeURIComponent(escape(atob(token)));
     var parts = decoded.split(':');
     if (parts.length >= 3 && parts[0] && parts[1]) {
-      currentUser = parts[0];
-      currentRole = parts[1];
       authToken = token;
     } else {
       localStorage.removeItem('wh_token');
@@ -719,34 +615,9 @@ var authToken = null;
     window.location.href = '/login.html';
     return;
   }
-
-  // 渲染用户栏
-  renderUserBar();
 })();
 
-function renderUserBar() {
-  var infoEl = document.getElementById('userInfo');
-  var actionsEl = document.getElementById('userActions');
 
-  // 头像取用户名首字母
-  var initial = currentUser.charAt(0).toUpperCase();
-
-  var html = '<div class="user-avatar">' + initial + '</div>';
-  html += '<div class="user-meta">';
-  html += '<span class="user-name">' + currentUser + '</span>';
-  if (currentRole === 'admin') {
-    html += '<span class="user-role-tag role-tag-admin">管理员</span>';
-  } else {
-    html += '<span class="user-role-tag role-tag-user">普通用户</span>';
-  }
-  html += '</div>';
-  infoEl.innerHTML = html;
-
-  // 退出按钮
-  var actHtml = '';
-  actHtml += '<button class="logout-btn" onclick="doLogout()">🚪 退出登录</button>';
-  actionsEl.innerHTML = actHtml;
-}
 
 function showToast(msg) {
   // 移除已有的 toast
@@ -766,10 +637,7 @@ function showToast(msg) {
   }, 2600);
 }
 
-function doLogout() {
-  localStorage.removeItem('wh_token');
-  window.location.href = '/login.html';
-}
+
 
 // 全局 401 处理：token 失效时自动跳转登录
 function handleAuthError(status) {
