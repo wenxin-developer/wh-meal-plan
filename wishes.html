@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>愿望清单 - 我们的小日子</title>
+<title>许个愿望 - 我们的小日子</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -58,19 +58,20 @@
 
   .add-row {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
   }
 
   .add-row input {
     flex: 1;
-    padding: 12px 16px;
+    padding: 10px 14px;
     border: 1.5px solid #e0e0e0;
     border-radius: 12px;
     font-size: 0.95em;
     outline: none;
     background: #fafafa;
     -webkit-appearance: none;
+    min-width: 0;
   }
 
   .add-row input:focus {
@@ -80,35 +81,80 @@
   }
 
   .add-row select {
-    padding: 12px 10px;
+    padding: 10px 8px;
     border: 1.5px solid #e0e0e0;
     border-radius: 12px;
-    font-size: 0.88em;
+    font-size: 0.85em;
     outline: none;
     background: #fafafa;
     -webkit-appearance: none;
     appearance: none;
     text-align: center;
     text-align-last: center;
-    min-width: 80px;
+    min-width: 60px;
+    flex-shrink: 0;
   }
 
   .add-btn {
-    padding: 12px 20px;
+    padding: 10px 14px;
     background: linear-gradient(135deg, #ec407a, #ad1457);
     color: #fff;
     border: none;
     border-radius: 12px;
-    font-size: 0.95em;
+    font-size: 0.9em;
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 3px 10px rgba(236,64,122,0.3);
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .add-btn:active { transform: scale(0.96); }
+
+  .privacy-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .privacy-label {
+    font-size: 0.82em;
+    color: #78909c;
+    flex-shrink: 0;
+  }
+
+  .privacy-toggle {
+    display: flex;
+    gap: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1.5px solid #e0e0e0;
+  }
+
+  .privacy-opt {
+    padding: 6px 14px;
+    font-size: 0.82em;
+    font-weight: 500;
+    color: #78909c;
+    background: #fafafa;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s;
+    border: none;
+    outline: none;
+  }
+
+  .privacy-opt.active {
+    background: #fce4ec;
+    color: #ad1457;
+  }
+
+  .privacy-opt:first-child { border-right: 1px solid #e0e0e0; }
 
   .list-section {
     max-width: 640px;
@@ -194,6 +240,12 @@
     color: #bbb;
   }
 
+  .item-name.encrypted {
+    color: #b39ddb;
+    font-style: italic;
+    letter-spacing: 1px;
+  }
+
   .item-meta {
     font-size: 0.75em;
     color: #aaa;
@@ -212,6 +264,7 @@
   .tag-want { background: #fff3e0; color: #e65100; }
   .tag-really { background: #fce4ec; color: #c62828; }
   .tag-super { background: #f3e5f5; color: #6a1b9a; }
+  .tag-private { background: #ede7f6; color: #5e35b1; }
 
   .item-del {
     color: #ccc;
@@ -260,7 +313,7 @@
 
 <div class="nav-bar">
   <a class="back-btn" href="/">← 首页</a>
-  <span class="page-title">⭐ 愿望清单</span>
+  <span class="page-title">⭐ 许个愿望</span>
 </div>
 
 <div class="add-section">
@@ -272,6 +325,13 @@
       <option value="super">超想要</option>
     </select>
     <button class="add-btn" onclick="addWish()">许愿</button>
+  </div>
+  <div class="privacy-row">
+    <span class="privacy-label">可见范围：</span>
+    <div class="privacy-toggle">
+      <button class="privacy-opt active" id="optPublic" onclick="setPrivacy('public')">🌍 公开</button>
+      <button class="privacy-opt" id="optPrivate" onclick="setPrivacy('private')">🔒 仅自己</button>
+    </div>
   </div>
 </div>
 
@@ -295,6 +355,7 @@
 var currentUser = null;
 var authToken = null;
 var wishes = [];
+var currentPrivacy = 'public';
 
 (function checkAuth() {
   var token = localStorage.getItem('wh_token');
@@ -322,6 +383,12 @@ document.getElementById('wishInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') addWish();
 });
 
+function setPrivacy(val) {
+  currentPrivacy = val;
+  document.getElementById('optPublic').classList.toggle('active', val === 'public');
+  document.getElementById('optPrivate').classList.toggle('active', val === 'private');
+}
+
 function addWish() {
   var input = document.getElementById('wishInput');
   var text = input.value.trim();
@@ -333,6 +400,7 @@ function addWish() {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
     text: text,
     level: level,
+    privacy: currentPrivacy,
     done: false,
     author: currentUser,
     createdAt: new Date().toISOString()
@@ -376,6 +444,26 @@ function toggleDone() {
 var levelLabels = { want: '想要', really: '很想要', super: '超想要' };
 var levelClasses = { want: 'tag-want', really: 'tag-really', super: 'tag-super' };
 
+// 生成神秘文字（每次显示随机但固定）
+function getEncryptedText(wish) {
+  var seeds = [
+    '✦ 这是一个神秘的愿望 ✦',
+    '✧ 被施了魔法的愿望 ✧',
+    '❋ 藏在星星里的秘密 ❋',
+    '✿ 只有主人知道的愿望 ✿',
+    '❂ 加密的心愿封存中 ❂',
+    '✾ 月光下的悄悄话 ✾',
+    '❁ 风中的秘密愿望 ❁'
+  ];
+  // 用 wish.id 的 hash 来固定选择
+  var hash = 0;
+  for (var i = 0; i < wish.id.length; i++) {
+    hash = ((hash << 5) - hash) + wish.id.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return seeds[Math.abs(hash) % seeds.length];
+}
+
 function renderWishes() {
   var pending = wishes.filter(function(w) { return !w.done; });
   var done = wishes.filter(function(w) { return w.done; });
@@ -389,32 +477,39 @@ function renderWishes() {
   if (pending.length === 0) {
     pendingEl.innerHTML = '<div class="empty-tip"><div class="emoji">⭐</div>还没有愿望，许个愿吧</div>';
   } else {
-    pendingEl.innerHTML = pending.map(function(w) {
-      return '<div class="item-row">' +
-        '<div class="item-check" onclick="toggleWish(\'' + w.id + '\')"></div>' +
-        '<div class="item-info">' +
-          '<div class="item-name">' + escHtml(w.text) + '</div>' +
-          '<div class="item-meta"><span class="item-tag ' + (levelClasses[w.level]||'tag-want') + '">' + (levelLabels[w.level]||'想要') + '</span>' + w.author + ' 许愿</div>' +
-        '</div>' +
-        '<div class="item-del" onclick="deleteWish(\'' + w.id + '\')">×</div>' +
-      '</div>';
-    }).join('');
+    pendingEl.innerHTML = pending.map(function(w) { return renderItem(w, false); }).join('');
   }
 
   if (done.length === 0) {
     doneEl.innerHTML = '';
   } else {
-    doneEl.innerHTML = done.map(function(w) {
-      return '<div class="item-row">' +
-        '<div class="item-check checked" onclick="toggleWish(\'' + w.id + '\')"></div>' +
-        '<div class="item-info">' +
-          '<div class="item-name done">' + escHtml(w.text) + '</div>' +
-          '<div class="item-meta"><span class="item-tag ' + (levelClasses[w.level]||'tag-want') + '">' + (levelLabels[w.level]||'想要') + '</span>' + w.author + ' 许愿</div>' +
-        '</div>' +
-        '<div class="item-del" onclick="deleteWish(\'' + w.id + '\')">×</div>' +
-      '</div>';
-    }).join('');
+    doneEl.innerHTML = done.map(function(w) { return renderItem(w, true); }).join('');
   }
+}
+
+function renderItem(w, isDone) {
+  var isPrivate = w.privacy === 'private';
+  var isMine = w.author === currentUser;
+  var showEncrypted = isPrivate && !isMine;
+
+  var displayText = showEncrypted ? getEncryptedText(w) : escHtml(w.text);
+  var nameClass = 'item-name' + (isDone ? ' done' : '') + (showEncrypted ? ' encrypted' : '');
+
+  var tags = '<span class="item-tag ' + (levelClasses[w.level]||'tag-want') + '">' + (levelLabels[w.level]||'想要') + '</span>';
+  if (isPrivate) {
+    tags += '<span class="item-tag tag-private">🔒</span>';
+  }
+
+  var metaText = showEncrypted ? w.author + ' 的秘密愿望' : w.author + ' 许愿';
+
+  return '<div class="item-row">' +
+    '<div class="item-check' + (isDone ? ' checked' : '') + '" onclick="toggleWish(\'' + w.id + '\')"></div>' +
+    '<div class="item-info">' +
+      '<div class="' + nameClass + '">' + displayText + '</div>' +
+      '<div class="item-meta">' + tags + metaText + '</div>' +
+    '</div>' +
+    (isMine ? '<div class="item-del" onclick="deleteWish(\'' + w.id + '\')">×</div>' : '') +
+  '</div>';
 }
 
 function escHtml(s) {
