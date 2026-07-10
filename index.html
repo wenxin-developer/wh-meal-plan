@@ -386,6 +386,7 @@ function doLogout() {
 
 /* ========== 天气模块 ========== */
 var QW_KEY = '717b21583a484162b0c3d57843abad5b';
+var QW_HOST = 'm56hf29eet.re.qweatherapi.com';
 
 function loadWeather() {
   // 检查缓存（30分钟有效）
@@ -420,7 +421,7 @@ function loadWeather() {
 }
 
 function fetchWeather(location) {
-  var url = 'https://devapi.qweather.com/v7/weather/now?location=' + location + '&key=' + QW_KEY;
+  var url = 'https://' + QW_HOST + '/v7/weather/now?location=' + location + '&key=' + QW_KEY;
   fetch(url)
     .then(function(r) { return r.json(); })
     .then(function(res) {
@@ -448,7 +449,7 @@ function fetchWeather(location) {
 }
 
 function fetchCityName(location, data) {
-  var url = 'https://geoapi.qweather.com/v2/city/lookup?location=' + location + '&key=' + QW_KEY + '&number=1';
+  var url = 'https://' + QW_HOST + '/v2/city/lookup?location=' + location + '&key=' + QW_KEY + '&number=1';
   fetch(url)
     .then(function(r) { return r.json(); })
     .then(function(res) {
