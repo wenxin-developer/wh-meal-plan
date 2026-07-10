@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>愿望清单 - 我们的小日子</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 50%, #ede7f6 100%);
+    min-height: 100vh;
+    padding: 0 16px 40px;
+  }
+
+  .nav-bar {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #546e7a;
+    font-size: 0.88em;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .back-btn:active { transform: scale(0.96); }
+
+  .page-title {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #ad1457;
+    flex: 1;
+  }
+
+  .add-section {
+    max-width: 640px;
+    margin: 16px auto;
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .add-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .add-row input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 0.95em;
+    outline: none;
+    background: #fafafa;
+    -webkit-appearance: none;
+  }
+
+  .add-row input:focus {
+    border-color: #ec407a;
+    box-shadow: 0 0 0 3px rgba(236,64,122,0.1);
+    background: #fff;
+  }
+
+  .add-row select {
+    padding: 12px 10px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 0.88em;
+    outline: none;
+    background: #fafafa;
+    -webkit-appearance: none;
+    appearance: none;
+    text-align: center;
+    text-align-last: center;
+    min-width: 80px;
+  }
+
+  .add-btn {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #ec407a, #ad1457);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(236,64,122,0.3);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    white-space: nowrap;
+  }
+
+  .add-btn:active { transform: scale(0.96); }
+
+  .list-section {
+    max-width: 640px;
+    margin: 20px auto;
+  }
+
+  .section-label {
+    font-size: 0.88em;
+    font-weight: 600;
+    color: #78909c;
+    margin-bottom: 10px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-label .count {
+    background: #fce4ec;
+    color: #ad1457;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.85em;
+  }
+
+  .item-list {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  .item-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f5f5f5;
+    gap: 12px;
+  }
+
+  .item-row:last-child { border-bottom: none; }
+
+  .item-check {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #bdbdbd;
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s;
+  }
+
+  .item-check.checked {
+    background: #ec407a;
+    border-color: #ec407a;
+  }
+
+  .item-check.checked::after {
+    content: '✓';
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .item-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .item-name {
+    font-size: 0.95em;
+    color: #333;
+    font-weight: 500;
+    word-break: break-all;
+  }
+
+  .item-name.done {
+    text-decoration: line-through;
+    color: #bbb;
+  }
+
+  .item-meta {
+    font-size: 0.75em;
+    color: #aaa;
+    margin-top: 3px;
+  }
+
+  .item-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 0.72em;
+    font-weight: 500;
+    margin-right: 4px;
+  }
+
+  .tag-want { background: #fff3e0; color: #e65100; }
+  .tag-really { background: #fce4ec; color: #c62828; }
+  .tag-super { background: #f3e5f5; color: #6a1b9a; }
+
+  .item-del {
+    color: #ccc;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 4px 8px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .item-del:active { color: #e53935; }
+
+  .done-section {
+    max-width: 640px;
+    margin: 16px auto;
+  }
+
+  .done-toggle {
+    font-size: 0.88em;
+    font-weight: 600;
+    color: #90a4ae;
+    cursor: pointer;
+    padding: 10px 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .done-list {
+    display: none;
+  }
+
+  .done-list.open { display: block; }
+
+  .empty-tip {
+    text-align: center;
+    padding: 40px 20px;
+    color: #bbb;
+    font-size: 0.9em;
+  }
+
+  .empty-tip .emoji { font-size: 2em; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a class="back-btn" href="/">← 首页</a>
+  <span class="page-title">⭐ 愿望清单</span>
+</div>
+
+<div class="add-section">
+  <div class="add-row">
+    <input type="text" id="wishInput" placeholder="许个愿望..." maxlength="80">
+    <select id="levelSelect">
+      <option value="want">想要</option>
+      <option value="really">很想要</option>
+      <option value="super">超想要</option>
+    </select>
+    <button class="add-btn" onclick="addWish()">许愿</button>
+  </div>
+</div>
+
+<div class="list-section" id="pendingSection">
+  <div class="section-label">
+    待实现 <span class="count" id="pendingCount">0</span>
+  </div>
+  <div class="item-list" id="pendingList"></div>
+</div>
+
+<div class="done-section" id="doneSection">
+  <div class="done-toggle" onclick="toggleDone()">
+    <span id="doneArrow">▶</span> 已实现 <span id="doneCount">0</span>
+  </div>
+  <div class="done-list" id="doneList">
+    <div class="item-list" id="doneListInner"></div>
+  </div>
+</div>
+
+<script>
+var currentUser = null;
+var authToken = null;
+var wishes = [];
+
+(function checkAuth() {
+  var token = localStorage.getItem('wh_token');
+  if (!token) { window.location.href = '/login.html'; return; }
+  try {
+    var decoded = decodeURIComponent(escape(atob(token)));
+    var parts = decoded.split(':');
+    if (parts.length >= 3 && parts[0] && parts[1]) {
+      currentUser = parts[0];
+      authToken = token;
+    } else {
+      localStorage.removeItem('wh_token');
+      window.location.href = '/login.html';
+      return;
+    }
+  } catch(e) {
+    localStorage.removeItem('wh_token');
+    window.location.href = '/login.html';
+    return;
+  }
+  loadWishes();
+})();
+
+document.getElementById('wishInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') addWish();
+});
+
+function addWish() {
+  var input = document.getElementById('wishInput');
+  var text = input.value.trim();
+  if (!text) return;
+
+  var level = document.getElementById('levelSelect').value;
+
+  var wish = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    text: text,
+    level: level,
+    done: false,
+    author: currentUser,
+    createdAt: new Date().toISOString()
+  };
+
+  wishes.unshift(wish);
+  input.value = '';
+  saveWishes();
+  renderWishes();
+}
+
+function toggleWish(id) {
+  for (var i = 0; i < wishes.length; i++) {
+    if (wishes[i].id === id) {
+      wishes[i].done = !wishes[i].done;
+      if (wishes[i].done) {
+        wishes[i].doneAt = new Date().toISOString();
+      } else {
+        delete wishes[i].doneAt;
+      }
+      break;
+    }
+  }
+  saveWishes();
+  renderWishes();
+}
+
+function deleteWish(id) {
+  wishes = wishes.filter(function(w) { return w.id !== id; });
+  saveWishes();
+  renderWishes();
+}
+
+function toggleDone() {
+  var el = document.getElementById('doneList');
+  var arrow = document.getElementById('doneArrow');
+  el.classList.toggle('open');
+  arrow.textContent = el.classList.contains('open') ? '▼' : '▶';
+}
+
+var levelLabels = { want: '想要', really: '很想要', super: '超想要' };
+var levelClasses = { want: 'tag-want', really: 'tag-really', super: 'tag-super' };
+
+function renderWishes() {
+  var pending = wishes.filter(function(w) { return !w.done; });
+  var done = wishes.filter(function(w) { return w.done; });
+
+  document.getElementById('pendingCount').textContent = pending.length;
+  document.getElementById('doneCount').textContent = done.length;
+
+  var pendingEl = document.getElementById('pendingList');
+  var doneEl = document.getElementById('doneListInner');
+
+  if (pending.length === 0) {
+    pendingEl.innerHTML = '<div class="empty-tip"><div class="emoji">⭐</div>还没有愿望，许个愿吧</div>';
+  } else {
+    pendingEl.innerHTML = pending.map(function(w) {
+      return '<div class="item-row">' +
+        '<div class="item-check" onclick="toggleWish(\'' + w.id + '\')"></div>' +
+        '<div class="item-info">' +
+          '<div class="item-name">' + escHtml(w.text) + '</div>' +
+          '<div class="item-meta"><span class="item-tag ' + (levelClasses[w.level]||'tag-want') + '">' + (levelLabels[w.level]||'想要') + '</span>' + w.author + ' 许愿</div>' +
+        '</div>' +
+        '<div class="item-del" onclick="deleteWish(\'' + w.id + '\')">×</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  if (done.length === 0) {
+    doneEl.innerHTML = '';
+  } else {
+    doneEl.innerHTML = done.map(function(w) {
+      return '<div class="item-row">' +
+        '<div class="item-check checked" onclick="toggleWish(\'' + w.id + '\')"></div>' +
+        '<div class="item-info">' +
+          '<div class="item-name done">' + escHtml(w.text) + '</div>' +
+          '<div class="item-meta"><span class="item-tag ' + (levelClasses[w.level]||'tag-want') + '">' + (levelLabels[w.level]||'想要') + '</span>' + w.author + ' 许愿</div>' +
+        '</div>' +
+        '<div class="item-del" onclick="deleteWish(\'' + w.id + '\')">×</div>' +
+      '</div>';
+    }).join('');
+  }
+}
+
+function escHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function loadWishes() {
+  fetch('/api/wishes', {
+    headers: { 'Authorization': 'Bearer ' + authToken }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    wishes = Array.isArray(data) ? data : [];
+    renderWishes();
+  })
+  .catch(function() { renderWishes(); });
+}
+
+function saveWishes() {
+  fetch('/api/wishes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authToken
+    },
+    body: JSON.stringify(wishes)
+  }).catch(function() {});
+}
+</script>
+</body>
+</html>
