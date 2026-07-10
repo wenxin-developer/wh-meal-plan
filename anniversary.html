@@ -50,43 +50,57 @@
   /* 主纪念日卡片 */
   .hero-card {
     max-width: 560px;
-    margin: 16px auto;
+    margin: 12px auto;
     background: linear-gradient(135deg, #ec4899, #f43f5e);
-    border-radius: 20px;
-    padding: 28px 24px;
+    border-radius: 16px;
+    padding: 16px 20px;
     color: #fff;
-    box-shadow: 0 6px 24px rgba(236,72,153,0.3);
-    text-align: center;
+    box-shadow: 0 4px 16px rgba(236,72,153,0.25);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .hero-left {
+    flex: 1;
+    min-width: 0;
   }
 
   .hero-label {
-    font-size: 0.88em;
-    opacity: 0.85;
-    margin-bottom: 6px;
+    font-size: 0.78em;
+    opacity: 0.8;
+    margin-bottom: 2px;
   }
 
   .hero-title {
-    font-size: 1.3em;
+    font-size: 1.05em;
     font-weight: 700;
-    margin-bottom: 16px;
-  }
-
-  .hero-days {
-    font-size: 3.5em;
-    font-weight: 800;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  .hero-unit {
-    font-size: 0.9em;
-    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .hero-date {
-    margin-top: 12px;
-    font-size: 0.85em;
+    margin-top: 4px;
+    font-size: 0.75em;
+    opacity: 0.7;
+  }
+
+  .hero-right {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .hero-days {
+    font-size: 2.4em;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .hero-unit {
+    font-size: 0.78em;
     opacity: 0.75;
+    margin-top: 2px;
   }
 
   /* 添加按钮 */
@@ -244,6 +258,8 @@
     outline: none;
     background: #fafafa;
     -webkit-appearance: none;
+    height: 44px;
+    line-height: 44px;
   }
 
   .modal-box input:focus {
@@ -283,7 +299,7 @@
 
   @media (max-width: 480px) {
     body { padding: 0 10px 32px; }
-    .hero-days { font-size: 2.8em; }
+    .hero-days { font-size: 2em; }
     .anni-card { padding: 14px 14px; }
   }
 </style>
@@ -297,11 +313,15 @@
 
 <!-- 主纪念日 -->
 <div class="hero-card" id="heroCard">
-  <div class="hero-label">在一起</div>
-  <div class="hero-title" id="heroTitle">❤️</div>
-  <div class="hero-days" id="heroDays">-</div>
-  <div class="hero-unit">天</div>
-  <div class="hero-date" id="heroDate"></div>
+  <div class="hero-left">
+    <div class="hero-label">在一起</div>
+    <div class="hero-title" id="heroTitle">❤️</div>
+    <div class="hero-date" id="heroDate"></div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-days" id="heroDays">-</div>
+    <div class="hero-unit">天</div>
+  </div>
 </div>
 
 <button class="add-btn" onclick="showAddModal()">＋ 添加纪念日</button>
