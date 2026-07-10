@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日问答 - 我们的小日子</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 50%, #fff8e1 100%);
+    min-height: 100vh;
+    padding: 0 16px 40px;
+  }
+
+  .nav-bar {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #8d6e63;
+    font-size: 0.88em;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .back-btn:active { transform: scale(0.96); }
+
+  .page-title {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #e65100;
+    flex: 1;
+  }
+
+  .streak-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #ff6d00, #ff9100);
+    color: #fff;
+    border-radius: 16px;
+    font-size: 0.82em;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(255,109,0,0.3);
+  }
+
+  /* 今日问答卡片 */
+  .today-card {
+    max-width: 640px;
+    margin: 16px auto;
+    background: #fff;
+    border-radius: 24px;
+    padding: 28px 24px;
+    box-shadow: 0 6px 24px rgba(230,81,0,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .today-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ff6d00, #ff9100, #ffab40);
+  }
+
+  .today-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .today-label {
+    font-size: 0.82em;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+
+  .today-label .custom-tag {
+    display: inline-block;
+    padding: 1px 6px;
+    background: #fff3e0;
+    color: #e65100;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 600;
+    margin-left: 4px;
+  }
+
+  .change-btn {
+    padding: 6px 12px;
+    background: #f5f5f5;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.8em;
+    font-weight: 600;
+    color: #78909c;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .change-btn:active { transform: scale(0.96); background: #eee; }
+  .change-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* 问题展示 */
+  .question-display {
+    text-align: center;
+    padding: 24px 16px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #fff8e1, #fff3e0);
+    border-radius: 18px;
+    position: relative;
+  }
+
+  .question-category {
+    font-size: 0.78em;
+    color: #ff9100;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .question-text {
+    font-size: 1.25em;
+    font-weight: 700;
+    color: #3e2723;
+    line-height: 1.5;
+  }
+
+  /* 回答区域 */
+  .answer-area {
+    margin-bottom: 16px;
+  }
+
+  .answer-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #ffe0b2;
+    border-radius: 14px;
+    font-size: 0.95em;
+    outline: none;
+    background: #fffdf8;
+    resize: none;
+    min-height: 80px;
+    font-family: inherit;
+    line-height: 1.5;
+    -webkit-appearance: none;
+  }
+
+  .answer-input:focus {
+    border-color: #ff9100;
+    box-shadow: 0 0 0 3px rgba(255,145,0,0.1);
+    background: #fff;
+  }
+
+  .answer-input:disabled {
+    background: #f5f5f5;
+    border-color: #e0e0e0;
+    color: #666;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #ff6d00, #ff9100);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 4px 14px rgba(255,109,0,0.3);
+    transition: all 0.15s;
+  }
+
+  .submit-btn:active { transform: scale(0.97); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* 等待状态 */
+  .waiting-msg {
+    text-align: center;
+    padding: 16px;
+    color: #9ca3af;
+    font-size: 0.88em;
+  }
+
+  .waiting-msg .dot-anim {
+    display: inline-block;
+    animation: dotPulse 1.4s infinite;
+  }
+
+  @keyframes dotPulse {
+    0%, 80%, 100% { opacity: 0.3; }
+    40% { opacity: 1; }
+  }
+
+  /* 揭晓区域 */
+  .reveal-area {
+    display: none;
+  }
+
+  .reveal-area.show { display: block; }
+
+  .reveal-title {
+    text-align: center;
+    font-size: 1em;
+    font-weight: 700;
+    color: #e65100;
+    margin-bottom: 16px;
+  }
+
+  .reveal-cards {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .reveal-card {
+    flex: 1;
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+    border: 2px solid #ffe0b2;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: rotateY(90deg);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .reveal-card.flipped {
+    opacity: 1;
+    transform: rotateY(0deg);
+  }
+
+  .reveal-card.match {
+    border-color: #ff6d00;
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  }
+
+  .reveal-name {
+    font-size: 0.82em;
+    color: #9ca3af;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .reveal-answer {
+    font-size: 1.05em;
+    font-weight: 700;
+    color: #3e2723;
+    line-height: 1.4;
+    word-break: break-all;
+  }
+
+  .reveal-comment {
+    text-align: center;
+    padding: 12px;
+    background: #fff8e1;
+    border-radius: 12px;
+    font-size: 0.85em;
+    color: #8d6e63;
+    font-weight: 500;
+  }
+
+  .reveal-comment.soulmate {
+    background: linear-gradient(135deg, #fce4ec, #fff3e0);
+    color: #e65100;
+    font-weight: 700;
+  }
+
+  /* 换题弹窗 */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal-box {
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+
+  .modal-box h3 {
+    margin-bottom: 18px;
+    color: #e65100;
+    font-size: 1.1em;
+    text-align: center;
+  }
+
+  .modal-option {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 2px solid #ffe0b2;
+    border-radius: 14px;
+    background: #fffdf8;
+    font-size: 0.92em;
+    font-weight: 600;
+    color: #5d4037;
+    cursor: pointer;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s;
+  }
+
+  .modal-option:active { transform: scale(0.98); background: #fff3e0; }
+
+  .modal-option .opt-icon { margin-right: 8px; }
+  .modal-option .opt-desc {
+    display: block;
+    font-size: 0.82em;
+    font-weight: 400;
+    color: #9ca3af;
+    margin-top: 2px;
+  }
+
+  .custom-input-area {
+    display: none;
+    margin-top: 12px;
+  }
+
+  .custom-input-area.show { display: block; }
+
+  .custom-input-area input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #ffe0b2;
+    border-radius: 12px;
+    font-size: 0.92em;
+    outline: none;
+    background: #fffdf8;
+    margin-bottom: 10px;
+    height: 44px;
+    -webkit-appearance: none;
+  }
+
+  .custom-input-area input:focus {
+    border-color: #ff9100;
+    background: #fff;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .modal-actions button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.92em;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .modal-cancel { background: #f5f5f5; color: #78909c; }
+  .modal-confirm {
+    background: linear-gradient(135deg, #ff6d00, #ff9100);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(255,109,0,0.3);
+  }
+
+  /* 自定义题库入口 */
+  .custom-bank-btn {
+    max-width: 640px;
+    margin: 16px auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .custom-bank-btn:active { transform: scale(0.98); }
+
+  .custom-bank-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #5d4037;
+  }
+
+  .custom-bank-count {
+    font-size: 0.8em;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+
+  /* 题库管理弹窗 */
+  .bank-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 14px;
+  }
+
+  .bank-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f5f5f5;
+  }
+
+  .bank-item:last-child { border-bottom: none; }
+
+  .bank-item-text {
+    flex: 1;
+    font-size: 0.88em;
+    color: #333;
+    min-width: 0;
+    word-break: break-all;
+  }
+
+  .bank-item-del {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: #fce4ec;
+    color: #e53935;
+    font-size: 0.9em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .bank-add-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .bank-add-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #ffe0b2;
+    border-radius: 12px;
+    font-size: 0.9em;
+    outline: none;
+    background: #fffdf8;
+    height: 42px;
+    min-width: 0;
+    -webkit-appearance: none;
+  }
+
+  .bank-add-row input:focus { border-color: #ff9100; background: #fff; }
+
+  .bank-add-btn {
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #ff6d00, #ff9100);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.88em;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .bank-empty {
+    text-align: center;
+    padding: 24px;
+    color: #ccc;
+    font-size: 0.88em;
+  }
+
+  /* 历史区域 */
+  .history-section {
+    max-width: 640px;
+    margin: 20px auto;
+  }
+
+  .history-toggle {
+    font-size: 0.88em;
+    font-weight: 600;
+    color: #90a4ae;
+    cursor: pointer;
+    padding: 10px 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .history-list { display: none; }
+  .history-list.open { display: block; }
+
+  .history-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+
+  .history-date {
+    font-size: 0.75em;
+    color: #bbb;
+    margin-bottom: 6px;
+  }
+
+  .history-q {
+    font-size: 0.88em;
+    font-weight: 600;
+    color: #5d4037;
+    margin-bottom: 8px;
+  }
+
+  .history-answers {
+    display: flex;
+    gap: 10px;
+  }
+
+  .history-ans {
+    flex: 1;
+    padding: 8px 10px;
+    background: #fff8e1;
+    border-radius: 10px;
+    font-size: 0.82em;
+    color: #8d6e63;
+  }
+
+  .history-ans-name {
+    font-size: 0.85em;
+    color: #bbb;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .history-match {
+    display: inline-block;
+    padding: 1px 6px;
+    background: #fce4ec;
+    color: #e65100;
+    border-radius: 6px;
+    font-size: 0.78em;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+
+  /* 心有灵犀特效 */
+  .heart-particle {
+    position: fixed;
+    z-index: 2001;
+    pointer-events: none;
+    font-size: 1.5em;
+    animation: heartFloat 2s ease-out forwards;
+  }
+
+  @keyframes heartFloat {
+    0% { opacity: 1; transform: translateY(0) scale(0.5); }
+    50% { opacity: 1; transform: translateY(-40px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-100px) scale(0.8); }
+  }
+
+  .soulmate-banner {
+    text-align: center;
+    padding: 16px;
+    background: linear-gradient(135deg, #fce4ec, #fff3e0);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    animation: soulmateGlow 1.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes soulmateGlow {
+    from { box-shadow: 0 0 10px rgba(255,109,0,0.1); }
+    to { box-shadow: 0 0 20px rgba(255,109,0,0.3); }
+  }
+
+  .soulmate-emoji { font-size: 2em; margin-bottom: 6px; }
+  .soulmate-text {
+    font-size: 1em;
+    font-weight: 700;
+    color: #e65100;
+  }
+
+  /* 空状态 */
+  .empty-tip {
+    text-align: center;
+    padding: 48px 20px;
+    color: #bbb;
+    font-size: 0.9em;
+  }
+
+  .empty-tip .emoji { font-size: 2.5em; margin-bottom: 10px; }
+
+  @media (max-width: 380px) {
+    .question-text { font-size: 1.1em; }
+    .reveal-cards { flex-direction: column; }
+    .today-card { padding: 22px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a class="back-btn" href="/">← 首页</a>
+  <span class="page-title">📝 每日问答</span>
+  <div class="streak-badge" id="streakBadge" style="display:none">🔥 <span id="streakNum">0</span>天</div>
+</div>
+
+<!-- 今日问答 -->
+<div class="today-card" id="todayCard">
+  <div class="today-header">
+    <span class="today-label" id="todayLabel">今日问题</span>
+    <button class="change-btn" id="changeBtn" onclick="showChangeModal()">🔄 换一题</button>
+  </div>
+
+  <div class="question-display">
+    <div class="question-category" id="qCategory"></div>
+    <div class="question-text" id="qText">加载中...</div>
+  </div>
+
+  <!-- 回答区 -->
+  <div class="answer-area" id="answerArea">
+    <textarea class="answer-input" id="answerInput" placeholder="写下你的回答..." maxlength="200"></textarea>
+  </div>
+  <button class="submit-btn" id="submitBtn" onclick="submitAnswer()">提交回答</button>
+
+  <!-- 等待区 -->
+  <div class="waiting-msg" id="waitingMsg" style="display:none">
+    ⏳ 等待对方回答中<span class="dot-anim">...</span>
+  </div>
+
+  <!-- 揭晓区 -->
+  <div class="reveal-area" id="revealArea">
+    <div id="soulmateBanner" style="display:none"></div>
+    <div class="reveal-title">🎉 答案揭晓</div>
+    <div class="reveal-cards">
+      <div class="reveal-card" id="revealCardA">
+        <div class="reveal-name" id="revealNameA"></div>
+        <div class="reveal-answer" id="revealAnswerA"></div>
+      </div>
+      <div class="reveal-card" id="revealCardB">
+        <div class="reveal-name" id="revealNameB"></div>
+        <div class="reveal-answer" id="revealAnswerB"></div>
+      </div>
+    </div>
+    <div class="reveal-comment" id="revealComment"></div>
+  </div>
+</div>
+
+<!-- 自定义题库 -->
+<div class="custom-bank-btn" onclick="showBankModal()">
+  <div class="custom-bank-left">✏️ 自定义题库</div>
+  <div class="custom-bank-count" id="bankCount">0 题</div>
+</div>
+
+<!-- 历史 -->
+<div class="history-section" id="historySection" style="display:none">
+  <div class="history-toggle" onclick="toggleHistory()">
+    <span id="historyArrow">▶</span> 📖 问答回忆 <span id="historyCount">0</span>
+  </div>
+  <div class="history-list" id="historyList"></div>
+</div>
+
+<!-- 换题弹窗 -->
+<div class="modal-overlay" id="changeModal">
+  <div class="modal-box">
+    <h3>🔄 换一道题</h3>
+    <button class="modal-option" onclick="changeRandom()">
+      <span class="opt-icon">🎲</span> 随机换一道
+      <span class="opt-desc">从题库中随机抽取</span>
+    </button>
+    <button class="modal-option" onclick="showCustomInput()">
+      <span class="opt-icon">✏️</span> 自己出题
+      <span class="opt-desc">写一个你想问的问题</span>
+    </button>
+    <div class="custom-input-area" id="customInputArea">
+      <input type="text" id="customQuestionInput" placeholder="输入你想问的问题..." maxlength="50">
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="hideCustomInput()">返回</button>
+        <button class="modal-confirm" onclick="changeCustom()">确定换题</button>
+      </div>
+    </div>
+    <div class="modal-actions" id="changeModalActions">
+      <button class="modal-cancel" onclick="hideChangeModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 题库管理弹窗 -->
+<div class="modal-overlay" id="bankModal">
+  <div class="modal-box">
+    <h3>✏️ 自定义题库</h3>
+    <div class="bank-list" id="bankList"></div>
+    <div class="bank-add-row">
+      <input type="text" id="bankNewInput" placeholder="添加新题目..." maxlength="50">
+      <button class="bank-add-btn" onclick="addBankQuestion()">添加</button>
+    </div>
+    <div class="modal-actions" style="margin-top:14px">
+      <button class="modal-cancel" onclick="hideBankModal()" style="flex:1">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========== 内置题库 ========== */
+var BUILTIN_QUESTIONS = [
+  // 💭 回忆杀
+  { q: "我们第一次见面时你穿的什么？", cat: "memory" },
+  { q: "在一起后最感动的一件事是什么？", cat: "memory" },
+  { q: "第一次说'我爱你'是在哪里？", cat: "memory" },
+  { q: "你记得我们第一次牵手是什么时候吗？", cat: "memory" },
+  { q: "第一次一起吃饭去的哪家店？", cat: "memory" },
+  { q: "你觉得我们是什么时候开始喜欢对方的？", cat: "memory" },
+  { q: "第一次吵架是因为什么？", cat: "memory" },
+  { q: "你手机里存的第一张我的照片是什么？", cat: "memory" },
+  { q: "我们第一次一起旅行去的哪里？", cat: "memory" },
+  { q: "你第一次给我买的礼物是什么？", cat: "memory" },
+  { q: "你印象最深的一次生日是怎么过的？", cat: "memory" },
+  { q: "我们说过最肉麻的一句话是什么？", cat: "memory" },
+  { q: "第一次见对方家长是什么感觉？", cat: "memory" },
+  { q: "你偷偷做过什么让我感动的事？", cat: "memory" },
+  { q: "我们在一起最久的一个拥抱有多长？", cat: "memory" },
+  { q: "你第一次觉得'就是这个人了'是什么时候？", cat: "memory" },
+  { q: "我们最搞笑的一次经历是什么？", cat: "memory" },
+  { q: "你第一次吃醋是因为什么？", cat: "memory" },
+  { q: "我们第一次一起看电影看的什么？", cat: "memory" },
+  { q: "你偷偷保存了我的哪些照片？", cat: "memory" },
+  { q: "我们最晚一次聊天到几点？", cat: "memory" },
+  { q: "你第一次叫我什么昵称？", cat: "memory" },
+  { q: "我们第一次一起做饭做了什么？", cat: "memory" },
+  { q: "你第一次看到我心动的原因是什么？", cat: "memory" },
+  { q: "我们最难忘的一个节日是哪个？", cat: "memory" },
+
+  // 🔮 未来畅想
+  { q: "如果中彩票第一件事做什么？", cat: "future" },
+  { q: "最想一起去哪个国家？", cat: "future" },
+  { q: "10年后我们的一天会是什么样？", cat: "future" },
+  { q: "以后想养什么宠物？", cat: "future" },
+  { q: "你最想和我一起学的一项技能是什么？", cat: "future" },
+  { q: "如果可以选择，你想住在海边还是山里？", cat: "future" },
+  { q: "退休后最想做的事是什么？", cat: "future" },
+  { q: "你最想和我一起去的演唱会是谁的？", cat: "future" },
+  { q: "如果开一家店，你想开什么店？", cat: "future" },
+  { q: "明年最想一起完成的目标是什么？", cat: "future" },
+  { q: "你最想和我一起看的日出在哪里？", cat: "future" },
+  { q: "如果可以去太空旅行，你去吗？", cat: "future" },
+  { q: "以后家里谁管钱？", cat: "future" },
+  { q: "你最想和我一起参加的活动是什么？", cat: "future" },
+  { q: "如果重新装修家，你最想改哪里？", cat: "future" },
+  { q: "你最想和我一起去的游乐园是哪个？", cat: "future" },
+  { q: "以后想生几个孩子？", cat: "future" },
+  { q: "你最想和我一起过的下一个纪念日怎么过？", cat: "future" },
+  { q: "如果世界末日只剩我们俩，第一件事做什么？", cat: "future" },
+  { q: "你最想和我一起拍的一组照片是什么风格？", cat: "future" },
+  { q: "以后想给家里的WiFi取什么名字？", cat: "future" },
+  { q: "你最想和我一起去的音乐节是哪个？", cat: "future" },
+  { q: "如果搬到另一个城市，你想去哪？", cat: "future" },
+  { q: "你最想和我一起做的志愿者活动是什么？", cat: "future" },
+  { q: "以后家里的家务怎么分配？", cat: "future" },
+
+  // 🎭 趣味二选一
+  { q: "如果只能吃一种食物一辈子？火锅还是烧烤？", cat: "fun" },
+  { q: "穿越到古代还是未来？", cat: "fun" },
+  { q: "变成猫一天还是鸟一天？", cat: "fun" },
+  { q: "永远不能吃甜食还是永远不能吃辣？", cat: "fun" },
+  { q: "拥有读心术还是隐身术？", cat: "fun" },
+  { q: "一辈子只能用一个APP还是永远不能用手机？", cat: "fun" },
+  { q: "和对方互换身体一天还是让对方失忆一天？", cat: "fun" },
+  { q: "永远25岁的身体还是永远25岁的心态？", cat: "fun" },
+  { q: "住在游乐园旁边还是住在海边？", cat: "fun" },
+  { q: "能听懂动物说话还是能和植物交流？", cat: "fun" },
+  { q: "回到10年前还是去到10年后？", cat: "fun" },
+  { q: "永远夏天还是永远秋天？", cat: "fun" },
+  { q: "拥有无限的钱但没有朋友还是有很多朋友但很穷？", cat: "fun" },
+  { q: "每天吃同一家餐厅还是每天必须自己做？", cat: "fun" },
+  { q: "能飞但是只能飞1米高还是能瞬移但只能移10米？", cat: "fun" },
+  { q: "一辈子不能上网还是一辈子不能出门？", cat: "fun" },
+  { q: "变成超级英雄还是超级反派？", cat: "fun" },
+  { q: "永远不用睡觉还是永远不用吃饭？", cat: "fun" },
+  { q: "拥有完美的记忆力还是完美的创造力？", cat: "fun" },
+  { q: "和100个鸭子大小的马打架还是和1个马大小的鸭子打架？", cat: "fun" },
+  { q: "永远只能穿拖鞋还是永远只能穿高跟鞋？", cat: "fun" },
+  { q: "能控制时间还是能控制天气？", cat: "fun" },
+  { q: "一辈子只能听一首歌还是一辈子不能听音乐？", cat: "fun" },
+  { q: "变成漫画人物一天还是变成动画人物一天？", cat: "fun" },
+  { q: "永远不用排队还是永远不用等红灯？", cat: "fun" },
+
+  // 💗 灵魂拷问
+  { q: "你觉得我最大的优点是什么？", cat: "soul" },
+  { q: "什么时候觉得最幸福？", cat: "soul" },
+  { q: "有什么一直想说但没说出口的话？", cat: "soul" },
+  { q: "你觉得我们最像哪对CP？", cat: "soul" },
+  { q: "我最让你受不了的习惯是什么？", cat: "soul" },
+  { q: "你觉得我什么时候最好看？", cat: "soul" },
+  { q: "如果用一个词形容我，你会用什么？", cat: "soul" },
+  { q: "你觉得我们之间最需要改进的是什么？", cat: "soul" },
+  { q: "你最喜欢我的哪个小习惯？", cat: "soul" },
+  { q: "你觉得我做过最浪漫的事是什么？", cat: "soul" },
+  { q: "你最想改掉我的哪个坏习惯？", cat: "soul" },
+  { q: "你觉得我们最大的默契是什么？", cat: "soul" },
+  { q: "你最喜欢我说的一句话是什么？", cat: "soul" },
+  { q: "你觉得我最大的变化是什么？", cat: "soul" },
+  { q: "你最想和我一起改掉的一个坏习惯是什么？", cat: "soul" },
+  { q: "你觉得我最像哪种动物？", cat: "soul" },
+  { q: "你最珍惜我们之间的什么？", cat: "soul" },
+  { q: "你觉得我最适合演什么角色？", cat: "soul" },
+  { q: "你最想对我说的一句情话是什么？", cat: "soul" },
+  { q: "你觉得我们在一起后最大的变化是什么？", cat: "soul" },
+  { q: "你最想和我一起实现的一个梦想是什么？", cat: "soul" },
+  { q: "你觉得我最有魅力的瞬间是什么时候？", cat: "soul" },
+  { q: "你最想感谢我的一件事是什么？", cat: "soul" },
+  { q: "你觉得我们的爱情像哪部电影？", cat: "soul" },
+  { q: "你最想和我一起保持的一个好习惯是什么？", cat: "soul" }
+];
+
+var CAT_NAMES = {
+  memory: '💭 回忆杀',
+  future: '🔮 未来畅想',
+  fun: '🎭 趣味二选一',
+  soul: '💗 灵魂拷问'
+};
+
+var CAT_COMMENTS_SAME = {
+  memory: '你们的回忆如此一致，这就是默契 ✨',
+  future: '心有灵犀！你们的梦想是一样的 💫',
+  fun: '哈哈，你们的选择一模一样！',
+  soul: '灵魂伴侣就是这样的感觉 💕'
+};
+
+var CAT_COMMENTS_DIFF = {
+  memory: '每个人的记忆角度不同，这就是有趣的地方',
+  future: '答案不一样也没关系，慢慢实现吧',
+  fun: '不同的选择，不同的视角，下次再试试',
+  soul: '坦诚的回答最珍贵，好好珍惜彼此'
+};
+
+/* ========== 状态 ========== */
+var currentUser = null;
+var authToken = null;
+var qaData = {};
+var todayKey = '';
+var changesToday = 0;
+
+(function checkAuth() {
+  var token = localStorage.getItem('wh_token');
+  if (!token) { window.location.href = '/login.html'; return; }
+  try {
+    var decoded = decodeURIComponent(escape(atob(token)));
+    var parts = decoded.split(':');
+    if (parts.length >= 3 && parts[0] && parts[1]) {
+      currentUser = parts[0];
+      authToken = token;
+    } else {
+      localStorage.removeItem('wh_token');
+      window.location.href = '/login.html';
+      return;
+    }
+  } catch(e) {
+    localStorage.removeItem('wh_token');
+    window.location.href = '/login.html';
+    return;
+  }
+  loadData();
+})();
+
+function getTodayKey() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function loadData() {
+  fetch('/api/daily-qa', {
+    headers: { 'Authorization': 'Bearer ' + authToken }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    qaData = data || {};
+    if (!qaData.answers) qaData.answers = {};
+    if (!qaData.customQuestions) qaData.customQuestions = [];
+    if (!qaData.streak) qaData.streak = 0;
+    todayKey = getTodayKey();
+    initToday();
+  })
+  .catch(function() {
+    qaData = { answers: {}, customQuestions: [], streak: 0 };
+    todayKey = getTodayKey();
+    initToday();
+  });
+}
+
+function saveData() {
+  fetch('/api/daily-qa', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authToken
+    },
+    body: JSON.stringify(qaData)
+  }).catch(function() {});
+}
+
+function getDayOfYear() {
+  var now = new Date();
+  var start = new Date(now.getFullYear(), 0, 0);
+  var diff = now - start;
+  return Math.floor(diff / 86400000);
+}
+
+function pickQuestion() {
+  var allQuestions = [];
+  // 自定义题优先
+  for (var i = 0; i < qaData.customQuestions.length; i++) {
+    allQuestions.push({ q: qaData.customQuestions[i], cat: 'custom' });
+  }
+  // 加内置题
+  for (var i = 0; i < BUILTIN_QUESTIONS.length; i++) {
+    allQuestions.push(BUILTIN_QUESTIONS[i]);
+  }
+
+  if (allQuestions.length === 0) return { q: "今天想对对方说什么？", cat: "soul" };
+
+  // 用日期做种子，保证同一天同一题
+  var dayNum = getDayOfYear();
+  var idx = dayNum % allQuestions.length;
+  return allQuestions[idx];
+}
+
+function initToday() {
+  var today = qaData.answers[todayKey];
+
+  // 更新连续天数
+  updateStreak();
+  if (qaData.streak > 0) {
+    document.getElementById('streakBadge').style.display = 'inline-flex';
+    document.getElementById('streakNum').textContent = qaData.streak;
+  }
+
+  // 更新题库计数
+  document.getElementById('bankCount').textContent = qaData.customQuestions.length + ' 题';
+
+  if (!today) {
+    // 今天还没有题目，生成一个
+    var q = pickQuestion();
+    today = {
+      question: q.q,
+      category: q.cat,
+      isCustom: false,
+      changes: 0,
+      userA: null,
+      userB: null
+    };
+    qaData.answers[todayKey] = today;
+    saveData();
+  }
+
+  changesToday = today.changes || 0;
+  renderToday(today);
+  renderHistory();
+}
+
+function renderToday(today) {
+  var catLabel = CAT_NAMES[today.category] || '✏️ 自定义题';
+  document.getElementById('qCategory').textContent = catLabel;
+  document.getElementById('qText').textContent = '"' + today.question + '"';
+
+  // 自定义标签
+  var labelHtml = '今日问题';
+  if (today.isCustom) labelHtml += '<span class="custom-tag">✏️ 自定义</span>';
+  document.getElementById('todayLabel').innerHTML = labelHtml;
+
+  // 换题按钮状态
+  var changeBtn = document.getElementById('changeBtn');
+  var bothAnswered = today.userA && today.userB;
+  if (bothAnswered || changesToday >= 3) {
+    changeBtn.disabled = true;
+    changeBtn.textContent = changesToday >= 3 && !bothAnswered ? '🔄 今日已换3次' : '🔄 换一题';
+  } else {
+    changeBtn.disabled = false;
+    changeBtn.textContent = '🔄 换一题';
+  }
+
+  // 判断当前用户是哪个位置
+  var mySlot = getMySlot();
+  var myAnswer = mySlot === 'A' ? today.userA : today.userB;
+  var otherAnswer = mySlot === 'A' ? today.userB : today.userA;
+
+  var answerArea = document.getElementById('answerArea');
+  var submitBtn = document.getElementById('submitBtn');
+  var waitingMsg = document.getElementById('waitingMsg');
+  var revealArea = document.getElementById('revealArea');
+
+  if (today.userA && today.userB) {
+    // 两人都答了 → 揭晓
+    answerArea.style.display = 'none';
+    submitBtn.style.display = 'none';
+    waitingMsg.style.display = 'none';
+    revealArea.classList.add('show');
+    showReveal(today);
+  } else if (myAnswer) {
+    // 我答了，等对方
+    answerArea.style.display = 'block';
+    document.getElementById('answerInput').value = myAnswer.text;
+    document.getElementById('answerInput').disabled = false;
+    submitBtn.style.display = 'block';
+    submitBtn.textContent = '修改回答';
+    waitingMsg.style.display = 'block';
+    revealArea.classList.remove('show');
+  } else {
+    // 还没答
+    answerArea.style.display = 'block';
+    document.getElementById('answerInput').value = '';
+    document.getElementById('answerInput').disabled = false;
+    submitBtn.style.display = 'block';
+    submitBtn.textContent = '提交回答';
+    waitingMsg.style.display = 'none';
+    revealArea.classList.remove('show');
+  }
+}
+
+function getMySlot() {
+  // 简单规则：用户名排序，小的为A，大的为B
+  // 从token中获取另一个用户名
+  var token = localStorage.getItem('wh_token');
+  try {
+    var decoded = decodeURIComponent(escape(atob(token)));
+    var parts = decoded.split(':');
+    // parts[0] = currentUser, parts[2] = partnerName (if exists)
+    var partner = parts[2] || '';
+    if (currentUser < partner || !partner) return 'A';
+    return 'B';
+  } catch(e) {
+    return 'A';
+  }
+}
+
+function getPartnerName() {
+  var token = localStorage.getItem('wh_token');
+  try {
+    var decoded = decodeURIComponent(escape(atob(token)));
+    var parts = decoded.split(':');
+    return parts[2] || '对方';
+  } catch(e) {
+    return '对方';
+  }
+}
+
+function submitAnswer() {
+  var text = document.getElementById('answerInput').value.trim();
+  if (!text) { alert('请写下你的回答'); return; }
+
+  var today = qaData.answers[todayKey];
+  if (!today) return;
+
+  var mySlot = getMySlot();
+  var answer = { text: text, time: new Date().toISOString() };
+
+  if (mySlot === 'A') {
+    today.userA = answer;
+  } else {
+    today.userB = answer;
+  }
+
+  saveData();
+  renderToday(today);
+}
+
+function showReveal(today) {
+  var nameA = getMySlot() === 'A' ? currentUser : getPartnerName();
+  var nameB = getMySlot() === 'A' ? getPartnerName() : currentUser;
+
+  document.getElementById('revealNameA').textContent = nameA;
+  document.getElementById('revealNameB').textContent = nameB;
+  document.getElementById('revealAnswerA').textContent = today.userA.text;
+  document.getElementById('revealAnswerB').textContent = today.userB.text;
+
+  // 判断是否一致
+  var isMatch = today.userA.text.trim() === today.userB.text.trim();
+  var cardA = document.getElementById('revealCardA');
+  var cardB = document.getElementById('revealCardB');
+  var comment = document.getElementById('revealComment');
+  var banner = document.getElementById('soulmateBanner');
+
+  cardA.classList.remove('match', 'flipped');
+  cardB.classList.remove('match', 'flipped');
+
+  if (isMatch) {
+    cardA.classList.add('match');
+    cardB.classList.add('match');
+    banner.style.display = 'block';
+    banner.innerHTML = '<div class="soulmate-banner">' +
+      '<div class="soulmate-emoji">💕✨💕</div>' +
+      '<div class="soulmate-text">心有灵犀！你们的答案一模一样</div>' +
+      '</div>';
+    comment.className = 'reveal-comment soulmate';
+    comment.textContent = CAT_COMMENTS_SAME[today.category] || '太默契了！';
+    // 爱心粒子
+    setTimeout(launchHearts, 600);
+  } else {
+    banner.style.display = 'none';
+    comment.className = 'reveal-comment';
+    comment.textContent = CAT_COMMENTS_DIFF[today.category] || '不同的回答，同样的珍贵';
+  }
+
+  // 翻牌动画
+  setTimeout(function() { cardA.classList.add('flipped'); }, 200);
+  setTimeout(function() { cardB.classList.add('flipped'); }, 500);
+}
+
+function launchHearts() {
+  var emojis = ['💕','💗','💖','✨','💫','🌟','❤️','💘'];
+  for (var i = 0; i < 20; i++) {
+    (function(idx) {
+      setTimeout(function() {
+        var el = document.createElement('div');
+        el.className = 'heart-particle';
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        el.style.left = (10 + Math.random() * 80) + 'vw';
+        el.style.top = (40 + Math.random() * 40) + 'vh';
+        el.style.animationDuration = (1.5 + Math.random()) + 's';
+        document.body.appendChild(el);
+        setTimeout(function() { el.remove(); }, 3000);
+      }, idx * 100);
+    })(i);
+  }
+}
+
+function updateStreak() {
+  var today = getTodayKey();
+  var yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  var yKey = yesterday.getFullYear() + '-' + String(yesterday.getMonth()+1).padStart(2,'0') + '-' + String(yesterday.getDate()).padStart(2,'0');
+
+  var todayEntry = qaData.answers[today];
+  var yEntry = qaData.answers[yKey];
+
+  if (todayEntry && todayEntry.userA && todayEntry.userB) {
+    // 今天已完成
+    if (qaData.lastDate === today) {
+      // 已经计过了
+    } else {
+      if (yEntry && yEntry.userA && yEntry.userB) {
+        qaData.streak = (qaData.streak || 0) + 1;
+      } else {
+        qaData.streak = 1;
+      }
+      qaData.lastDate = today;
+    }
+  } else if (qaData.lastDate === today) {
+    // 今天还没完成但已标记
+  } else if (yEntry && yEntry.userA && yEntry.userB && qaData.lastDate !== today) {
+    // 昨天完成了但今天还没完成，streak保持
+  } else if (!yEntry || !yEntry.userA || !yEntry.userB) {
+    // 昨天没完成
+    if (qaData.lastDate !== today) {
+      qaData.streak = 0;
+    }
+  }
+}
+
+/* ========== 换题 ========== */
+function showChangeModal() {
+  document.getElementById('changeModal').classList.add('show');
+  document.getElementById('customInputArea').classList.remove('show');
+  document.getElementById('changeModalActions').style.display = 'flex';
+}
+
+function hideChangeModal() {
+  document.getElementById('changeModal').classList.remove('show');
+}
+
+function showCustomInput() {
+  document.getElementById('customInputArea').classList.add('show');
+  document.getElementById('changeModalActions').style.display = 'none';
+  document.getElementById('customQuestionInput').value = '';
+  document.getElementById('customQuestionInput').focus();
+}
+
+function hideCustomInput() {
+  document.getElementById('customInputArea').classList.remove('show');
+  document.getElementById('changeModalActions').style.display = 'flex';
+}
+
+function changeRandom() {
+  var today = qaData.answers[todayKey];
+  if (!today) return;
+
+  // 随机选一个不同的题
+  var allQ = BUILTIN_QUESTIONS.slice();
+  for (var i = 0; i < qaData.customQuestions.length; i++) {
+    allQ.push({ q: qaData.customQuestions[i], cat: 'custom' });
+  }
+
+  var newQ;
+  var attempts = 0;
+  do {
+    newQ = allQ[Math.floor(Math.random() * allQ.length)];
+    attempts++;
+  } while (newQ.q === today.question && attempts < 20);
+
+  today.question = newQ.q;
+  today.category = newQ.cat;
+  today.isCustom = newQ.cat === 'custom';
+  today.changes = (today.changes || 0) + 1;
+  // 清空已有回答
+  today.userA = null;
+  today.userB = null;
+  changesToday = today.changes;
+
+  saveData();
+  renderToday(today);
+  hideChangeModal();
+}
+
+function changeCustom() {
+  var q = document.getElementById('customQuestionInput').value.trim();
+  if (!q) { alert('请输入问题'); return; }
+
+  var today = qaData.answers[todayKey];
+  if (!today) return;
+
+  today.question = q;
+  today.category = 'custom';
+  today.isCustom = true;
+  today.changes = (today.changes || 0) + 1;
+  today.userA = null;
+  today.userB = null;
+  changesToday = today.changes;
+
+  // 自动加入自定义题库
+  if (qaData.customQuestions.indexOf(q) === -1) {
+    qaData.customQuestions.push(q);
+  }
+
+  saveData();
+  renderToday(today);
+  document.getElementById('bankCount').textContent = qaData.customQuestions.length + ' 题';
+  hideChangeModal();
+}
+
+/* ========== 题库管理 ========== */
+function showBankModal() {
+  document.getElementById('bankModal').classList.add('show');
+  renderBankList();
+}
+
+function hideBankModal() {
+  document.getElementById('bankModal').classList.remove('show');
+}
+
+function renderBankList() {
+  var list = document.getElementById('bankList');
+  if (qaData.customQuestions.length === 0) {
+    list.innerHTML = '<div class="bank-empty">还没有自定义题目<br>添加你们专属的问题吧</div>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < qaData.customQuestions.length; i++) {
+    html += '<div class="bank-item">' +
+      '<div class="bank-item-text">' + escHtml(qaData.customQuestions[i]) + '</div>' +
+      '<button class="bank-item-del" onclick="removeBankQuestion(' + i + ')">×</button>' +
+      '</div>';
+  }
+  list.innerHTML = html;
+}
+
+function addBankQuestion() {
+  var input = document.getElementById('bankNewInput');
+  var q = input.value.trim();
+  if (!q) return;
+  if (qaData.customQuestions.indexOf(q) !== -1) { alert('这道题已经存在了'); return; }
+  qaData.customQuestions.push(q);
+  saveData();
+  input.value = '';
+  renderBankList();
+  document.getElementById('bankCount').textContent = qaData.customQuestions.length + ' 题';
+}
+
+function removeBankQuestion(idx) {
+  qaData.customQuestions.splice(idx, 1);
+  saveData();
+  renderBankList();
+  document.getElementById('bankCount').textContent = qaData.customQuestions.length + ' 题';
+}
+
+/* ========== 历史 ========== */
+function renderHistory() {
+  var keys = Object.keys(qaData.answers).sort().reverse();
+  var historyItems = [];
+
+  for (var i = 0; i < keys.length; i++) {
+    var entry = qaData.answers[keys[i]];
+    if (entry.userA && entry.userB) {
+      historyItems.push({ date: keys[i], data: entry });
+    }
+  }
+
+  if (historyItems.length === 0) {
+    document.getElementById('historySection').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('historySection').style.display = 'block';
+  document.getElementById('historyCount').textContent = historyItems.length;
+
+  var html = '';
+  for (var i = 0; i < historyItems.length; i++) {
+    var h = historyItems[i];
+    var isMatch = h.data.userA.text.trim() === h.data.userB.text.trim();
+    var nameA = getMySlot() === 'A' ? currentUser : getPartnerName();
+    var nameB = getMySlot() === 'A' ? getPartnerName() : currentUser;
+
+    html += '<div class="history-card">';
+    html += '<div class="history-date">' + h.date + (isMatch ? '<span class="history-match">💕 心有灵犀</span>' : '') + '</div>';
+    html += '<div class="history-q">' + escHtml(h.data.question) + '</div>';
+    html += '<div class="history-answers">';
+    html += '<div class="history-ans"><div class="history-ans-name">' + escHtml(nameA) + '</div>' + escHtml(h.data.userA.text) + '</div>';
+    html += '<div class="history-ans"><div class="history-ans-name">' + escHtml(nameB) + '</div>' + escHtml(h.data.userB.text) + '</div>';
+    html += '</div>';
+    html += '</div>';
+  }
+
+  document.getElementById('historyList').innerHTML = html;
+}
+
+function toggleHistory() {
+  var el = document.getElementById('historyList');
+  var arrow = document.getElementById('historyArrow');
+  el.classList.toggle('open');
+  arrow.textContent = el.classList.contains('open') ? '▼' : '▶';
+}
+
+/* ========== 工具 ========== */
+function escHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
