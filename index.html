@@ -178,11 +178,90 @@
     color: #d1d5db;
   }
 
+  /* 天气卡片 */
+  .weather-card {
+    width: 100%;
+    max-width: 440px;
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 18px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 72px;
+    transition: opacity 0.3s;
+  }
+
+  .weather-card.loading {
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 0.85em;
+  }
+
+  .weather-icon {
+    font-size: 2.2em;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .weather-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .weather-top {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .weather-temp {
+    font-size: 1.5em;
+    font-weight: 800;
+    color: #1f2937;
+    line-height: 1;
+  }
+
+  .weather-desc {
+    font-size: 0.85em;
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  .weather-detail {
+    font-size: 0.75em;
+    color: #9ca3af;
+    display: flex;
+    gap: 10px;
+  }
+
+  .weather-tip {
+    margin-top: 2px;
+    font-size: 0.8em;
+    color: #f97316;
+    font-weight: 500;
+  }
+
+  .weather-city {
+    font-size: 0.75em;
+    color: #9ca3af;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
   /* 移动端 */
   @media (max-width: 380px) {
     .app-icon { width: 50px; height: 50px; font-size: 1.4em; border-radius: 14px; }
     .app-grid { gap: 16px 0; }
     .date-display .day { font-size: 2.2em; }
+    .weather-card { padding: 14px 16px; gap: 12px; }
+    .weather-temp { font-size: 1.3em; }
   }
 </style>
 </head>
@@ -204,6 +283,11 @@
 <div class="date-display">
   <div class="day" id="dateDay"></div>
   <div class="weekday" id="dateWeekday"></div>
+</div>
+
+<!-- 天气卡片 -->
+<div class="weather-card loading" id="weatherCard">
+  <span>🌤 获取天气中...</span>
 </div>
 
 <!-- APP 网格 4x2 -->
@@ -290,11 +374,168 @@ function initPage() {
   var weekdays = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
   document.getElementById('dateDay').textContent = (now.getMonth()+1) + '月' + now.getDate() + '日';
   document.getElementById('dateWeekday').textContent = weekdays[now.getDay()] + ' · ' + now.getFullYear();
+
+  // 加载天气
+  loadWeather();
 }
 
 function doLogout() {
   localStorage.removeItem('wh_token');
   window.location.href = '/login.html';
+}
+
+/* ========== 天气模块 ========== */
+var QW_KEY = '717b21583a484162b0c3d57843abad5b';
+
+function loadWeather() {
+  // 检查缓存（30分钟有效）
+  var cached = localStorage.getItem('wh_weather');
+  if (cached) {
+    try {
+      var data = JSON.parse(cached);
+      if (Date.now() - data.ts < 30 * 60 * 1000) {
+        renderWeather(data);
+        return;
+      }
+    } catch(e) {}
+  }
+
+  if (!navigator.geolocation) {
+    showWeatherError('浏览器不支持定位');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      var lon = pos.coords.longitude.toFixed(2);
+      var lat = pos.coords.latitude.toFixed(2);
+      fetchWeather(lon + ',' + lat);
+    },
+    function(err) {
+      // 定位失败，用成都作为默认城市
+      fetchWeather('104.07,30.67');
+    },
+    { timeout: 8000, enableHighAccuracy: false }
+  );
+}
+
+function fetchWeather(location) {
+  var url = 'https://devapi.qweather.com/v7/weather/now?location=' + location + '&key=' + QW_KEY;
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.code !== '200') {
+        showWeatherError('天气数据获取失败');
+        return;
+      }
+      var data = {
+        temp: res.now.temp,
+        feelsLike: res.now.feelsLike,
+        text: res.now.text,
+        icon: res.now.icon,
+        windDir: res.now.windDir,
+        windScale: res.now.windScale,
+        humidity: res.now.humidity,
+        location: location,
+        ts: Date.now()
+      };
+      // 获取城市名
+      fetchCityName(location, data);
+    })
+    .catch(function() {
+      showWeatherError('网络异常，请稍后刷新');
+    });
+}
+
+function fetchCityName(location, data) {
+  var url = 'https://geoapi.qweather.com/v2/city/lookup?location=' + location + '&key=' + QW_KEY + '&number=1';
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.code === '200' && res.location && res.location.length > 0) {
+        data.city = res.location[0].name;
+      }
+      localStorage.setItem('wh_weather', JSON.stringify(data));
+      renderWeather(data);
+    })
+    .catch(function() {
+      localStorage.setItem('wh_weather', JSON.stringify(data));
+      renderWeather(data);
+    });
+}
+
+function getWeatherEmoji(iconCode) {
+  var code = parseInt(iconCode);
+  if (code === 100 || code === 150) return '☀️';
+  if (code === 101 || code === 151) return '⛅';
+  if (code === 102 || code === 152) return '🌥️';
+  if (code === 103 || code === 153) return '🌤️';
+  if (code === 104 || code === 154) return '☁️';
+  if (code >= 300 && code <= 399) return '🌧️';
+  if (code >= 400 && code <= 499) return '🌨️';
+  if (code >= 500 && code <= 599) return '🌫️';
+  if (code >= 200 && code <= 299) return '⛈️';
+  return '🌤️';
+}
+
+function getTravelTip(data) {
+  var temp = parseInt(data.temp);
+  var text = data.text || '';
+  var tips = [];
+
+  // 根据天气状况
+  if (text.indexOf('雨') !== -1) tips.push('记得带伞 ☂️');
+  if (text.indexOf('雪') !== -1) tips.push('路面湿滑，注意安全 🧣');
+  if (text.indexOf('雾') !== -1 || text.indexOf('霾') !== -1) tips.push('能见度低，出行小心 🌫️');
+  if (text.indexOf('雷') !== -1) tips.push('雷暴天气，尽量待在室内 ⚡');
+
+  // 根据温度
+  if (temp >= 35) tips.push('高温预警，注意防暑多喝水 💧');
+  else if (temp >= 30) tips.push('天气炎热，注意防晒 🧴');
+  else if (temp <= 0) tips.push('天寒地冻，注意保暖 🧥');
+  else if (temp <= 10) tips.push('天气较冷，多穿点衣服 🧣');
+
+  // 根据风力
+  var windScale = parseInt(data.windScale) || 0;
+  if (windScale >= 5) tips.push('风力较大，注意防风 🌬️');
+
+  // 如果天气不错
+  if (tips.length === 0) {
+    if (temp >= 15 && temp <= 28) tips.push('天气不错，适合出门散步 🌳');
+    else tips.push('今天也是美好的一天 ✨');
+  }
+
+  return tips.join(' · ');
+}
+
+function renderWeather(data) {
+  var card = document.getElementById('weatherCard');
+  card.classList.remove('loading');
+  var emoji = getWeatherEmoji(data.icon);
+  var tip = getTravelTip(data);
+
+  card.innerHTML =
+    '<div class="weather-icon">' + emoji + '</div>' +
+    '<div class="weather-info">' +
+      '<div class="weather-top">' +
+        '<span class="weather-temp">' + data.temp + '°</span>' +
+        '<span class="weather-desc">' + data.text + '</span>' +
+      '</div>' +
+      '<div class="weather-detail">' +
+        '<span>体感 ' + data.feelsLike + '°</span>' +
+        '<span>湿度 ' + data.humidity + '%</span>' +
+        '<span>' + data.windDir + ' ' + data.windScale + '级</span>' +
+      '</div>' +
+      '<div class="weather-tip">' + tip + '</div>' +
+    '</div>' +
+    (data.city ? '<div class="weather-city">' + data.city + '</div>' : '');
+}
+
+function showWeatherError(msg) {
+  var card = document.getElementById('weatherCard');
+  card.classList.remove('loading');
+  card.style.opacity = '0.6';
+  card.innerHTML = '<span style="font-size:0.85em;color:#9ca3af;">🌤 ' + msg + '</span>';
 }
 </script>
 
