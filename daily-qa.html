@@ -983,8 +983,7 @@ function initToday() {
       category: q.cat,
       isCustom: false,
       changes: 0,
-      userA: null,
-      userB: null
+      answers: {}
     };
     qaData.answers[todayKey] = today;
     saveData();
@@ -1007,7 +1006,8 @@ function renderToday(today) {
 
   // 换题按钮状态
   var changeBtn = document.getElementById('changeBtn');
-  var bothAnswered = today.userA && today.userB;
+  var answerKeys = Object.keys(today.answers || {});
+  var bothAnswered = answerKeys.length >= 2;
   if (bothAnswered || changesToday >= 3) {
     changeBtn.disabled = true;
     changeBtn.textContent = changesToday >= 3 && !bothAnswered ? '🔄 今日已换3次' : '🔄 换一题';
@@ -1016,23 +1016,31 @@ function renderToday(today) {
     changeBtn.textContent = '🔄 换一题';
   }
 
-  // 判断当前用户是哪个位置
-  var mySlot = getMySlot();
-  var myAnswer = mySlot === 'A' ? today.userA : today.userB;
-  var otherAnswer = mySlot === 'A' ? today.userB : today.userA;
+  var myAnswer = today.answers ? today.answers[currentUser] : null;
+  var otherName = '';
+  var otherAnswer = null;
+  if (today.answers) {
+    for (var k in today.answers) {
+      if (k !== currentUser) {
+        otherName = k;
+        otherAnswer = today.answers[k];
+        break;
+      }
+    }
+  }
 
   var answerArea = document.getElementById('answerArea');
   var submitBtn = document.getElementById('submitBtn');
   var waitingMsg = document.getElementById('waitingMsg');
   var revealArea = document.getElementById('revealArea');
 
-  if (today.userA && today.userB) {
+  if (bothAnswered) {
     // 两人都答了 → 揭晓
     answerArea.style.display = 'none';
     submitBtn.style.display = 'none';
     waitingMsg.style.display = 'none';
     revealArea.classList.add('show');
-    showReveal(today);
+    showReveal(today, otherName);
   } else if (myAnswer) {
     // 我答了，等对方
     answerArea.style.display = 'block';
@@ -1054,33 +1062,6 @@ function renderToday(today) {
   }
 }
 
-function getMySlot() {
-  // 简单规则：用户名排序，小的为A，大的为B
-  // 从token中获取另一个用户名
-  var token = localStorage.getItem('wh_token');
-  try {
-    var decoded = decodeURIComponent(escape(atob(token)));
-    var parts = decoded.split(':');
-    // parts[0] = currentUser, parts[2] = partnerName (if exists)
-    var partner = parts[2] || '';
-    if (currentUser < partner || !partner) return 'A';
-    return 'B';
-  } catch(e) {
-    return 'A';
-  }
-}
-
-function getPartnerName() {
-  var token = localStorage.getItem('wh_token');
-  try {
-    var decoded = decodeURIComponent(escape(atob(token)));
-    var parts = decoded.split(':');
-    return parts[2] || '对方';
-  } catch(e) {
-    return '对方';
-  }
-}
-
 function submitAnswer() {
   var text = document.getElementById('answerInput').value.trim();
   if (!text) { alert('请写下你的回答'); return; }
@@ -1088,30 +1069,29 @@ function submitAnswer() {
   var today = qaData.answers[todayKey];
   if (!today) return;
 
-  var mySlot = getMySlot();
-  var answer = { text: text, time: new Date().toISOString() };
-
-  if (mySlot === 'A') {
-    today.userA = answer;
-  } else {
-    today.userB = answer;
-  }
+  if (!today.answers) today.answers = {};
+  today.answers[currentUser] = { text: text, time: new Date().toISOString() };
 
   saveData();
   renderToday(today);
 }
 
-function showReveal(today) {
-  var nameA = getMySlot() === 'A' ? currentUser : getPartnerName();
-  var nameB = getMySlot() === 'A' ? getPartnerName() : currentUser;
+function showReveal(today, otherName) {
+  var ansKeys = Object.keys(today.answers || {});
+  var name1 = currentUser;
+  var name2 = otherName || '对方';
+  var ans1 = today.answers[currentUser];
+  var ans2 = today.answers[otherName];
 
-  document.getElementById('revealNameA').textContent = nameA;
-  document.getElementById('revealNameB').textContent = nameB;
-  document.getElementById('revealAnswerA').textContent = today.userA.text;
-  document.getElementById('revealAnswerB').textContent = today.userB.text;
+  document.getElementById('revealNameA').textContent = name1;
+  document.getElementById('revealNameB').textContent = name2;
+  document.getElementById('revealAnswerA').textContent = ans1 ? ans1.text : '';
+  document.getElementById('revealAnswerB').textContent = ans2 ? ans2.text : '';
 
   // 判断是否一致
-  var isMatch = today.userA.text.trim() === today.userB.text.trim();
+  var text1 = ans1 ? ans1.text.trim() : '';
+  var text2 = ans2 ? ans2.text.trim() : '';
+  var isMatch = text1 === text2 && text1 !== '';
   var cardA = document.getElementById('revealCardA');
   var cardB = document.getElementById('revealCardB');
   var comment = document.getElementById('revealComment');
@@ -1170,12 +1150,14 @@ function updateStreak() {
   var todayEntry = qaData.answers[today];
   var yEntry = qaData.answers[yKey];
 
-  if (todayEntry && todayEntry.userA && todayEntry.userB) {
-    // 今天已完成
+  var todayDone = todayEntry && todayEntry.answers && Object.keys(todayEntry.answers).length >= 2;
+  var yDone = yEntry && yEntry.answers && Object.keys(yEntry.answers).length >= 2;
+
+  if (todayDone) {
     if (qaData.lastDate === today) {
       // 已经计过了
     } else {
-      if (yEntry && yEntry.userA && yEntry.userB) {
+      if (yDone) {
         qaData.streak = (qaData.streak || 0) + 1;
       } else {
         qaData.streak = 1;
@@ -1184,10 +1166,9 @@ function updateStreak() {
     }
   } else if (qaData.lastDate === today) {
     // 今天还没完成但已标记
-  } else if (yEntry && yEntry.userA && yEntry.userB && qaData.lastDate !== today) {
+  } else if (yDone && qaData.lastDate !== today) {
     // 昨天完成了但今天还没完成，streak保持
-  } else if (!yEntry || !yEntry.userA || !yEntry.userB) {
-    // 昨天没完成
+  } else if (!yDone) {
     if (qaData.lastDate !== today) {
       qaData.streak = 0;
     }
@@ -1239,8 +1220,7 @@ function changeRandom() {
   today.isCustom = newQ.cat === 'custom';
   today.changes = (today.changes || 0) + 1;
   // 清空已有回答
-  today.userA = null;
-  today.userB = null;
+  today.answers = {};
   changesToday = today.changes;
 
   saveData();
@@ -1259,8 +1239,7 @@ function changeCustom() {
   today.category = 'custom';
   today.isCustom = true;
   today.changes = (today.changes || 0) + 1;
-  today.userA = null;
-  today.userB = null;
+  today.answers = {};
   changesToday = today.changes;
 
   // 自动加入自定义题库
@@ -1326,7 +1305,7 @@ function renderHistory() {
 
   for (var i = 0; i < keys.length; i++) {
     var entry = qaData.answers[keys[i]];
-    if (entry.userA && entry.userB) {
+    if (entry.answers && Object.keys(entry.answers).length >= 2) {
       historyItems.push({ date: keys[i], data: entry });
     }
   }
@@ -1342,16 +1321,19 @@ function renderHistory() {
   var html = '';
   for (var i = 0; i < historyItems.length; i++) {
     var h = historyItems[i];
-    var isMatch = h.data.userA.text.trim() === h.data.userB.text.trim();
-    var nameA = getMySlot() === 'A' ? currentUser : getPartnerName();
-    var nameB = getMySlot() === 'A' ? getPartnerName() : currentUser;
+    var ansKeys = Object.keys(h.data.answers);
+    var name1 = ansKeys[0];
+    var name2 = ansKeys[1];
+    var ans1 = h.data.answers[name1];
+    var ans2 = h.data.answers[name2];
+    var isMatch = ans1.text.trim() === ans2.text.trim();
 
     html += '<div class="history-card">';
     html += '<div class="history-date">' + h.date + (isMatch ? '<span class="history-match">💕 心有灵犀</span>' : '') + '</div>';
     html += '<div class="history-q">' + escHtml(h.data.question) + '</div>';
     html += '<div class="history-answers">';
-    html += '<div class="history-ans"><div class="history-ans-name">' + escHtml(nameA) + '</div>' + escHtml(h.data.userA.text) + '</div>';
-    html += '<div class="history-ans"><div class="history-ans-name">' + escHtml(nameB) + '</div>' + escHtml(h.data.userB.text) + '</div>';
+    html += '<div class="history-ans"><div class="history-ans-name">' + escHtml(name1) + '</div>' + escHtml(ans1.text) + '</div>';
+    html += '<div class="history-ans"><div class="history-ans-name">' + escHtml(name2) + '</div>' + escHtml(ans2.text) + '</div>';
     html += '</div>';
     html += '</div>';
   }
