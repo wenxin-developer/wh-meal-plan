@@ -89,28 +89,92 @@
 
   .logout-btn:active { transform: scale(0.96); }
 
-  /* 日期显示 */
-  .date-display {
+  /* 日期+天气 合一卡片 */
+  .info-card {
     width: 100%;
     max-width: 440px;
-    text-align: center;
-    margin-top: 28px;
-    margin-bottom: 4px;
+    margin-top: 20px;
+    padding: 18px 20px 16px;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 18px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.05);
   }
 
-  .date-display .day {
-    font-size: 2.6em;
-    font-weight: 800;
-    color: #1f2937;
-    letter-spacing: -1px;
+  .info-card-date {
+    font-size: 0.88em;
+    color: #6b7280;
+    font-weight: 500;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    margin-bottom: 12px;
+  }
+
+  .info-card-weather {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .info-card-weather.loading {
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 0.85em;
+    min-height: 48px;
+  }
+
+  .weather-icon {
+    font-size: 2em;
+    flex-shrink: 0;
     line-height: 1;
   }
 
-  .date-display .weekday {
-    font-size: 0.92em;
-    color: #9ca3af;
-    margin-top: 6px;
+  .weather-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .weather-top {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .weather-temp {
+    font-size: 1.4em;
+    font-weight: 800;
+    color: #1f2937;
+    line-height: 1;
+  }
+
+  .weather-desc {
+    font-size: 0.82em;
+    color: #6b7280;
     font-weight: 500;
+  }
+
+  .weather-detail {
+    font-size: 0.73em;
+    color: #9ca3af;
+    display: flex;
+    gap: 10px;
+  }
+
+  .weather-tip {
+    margin-top: 1px;
+    font-size: 0.78em;
+    color: #f97316;
+    font-weight: 500;
+  }
+
+  .weather-city {
+    font-size: 0.73em;
+    color: #9ca3af;
+    text-align: right;
+    flex-shrink: 0;
   }
 
   /* APP 网格 — 4列2行 完美对齐 */
@@ -178,90 +242,12 @@
     color: #d1d5db;
   }
 
-  /* 天气卡片 */
-  .weather-card {
-    width: 100%;
-    max-width: 440px;
-    margin-top: 20px;
-    padding: 16px 20px;
-    background: rgba(255,255,255,0.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-radius: 18px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.05);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    min-height: 72px;
-    transition: opacity 0.3s;
-  }
-
-  .weather-card.loading {
-    justify-content: center;
-    color: #9ca3af;
-    font-size: 0.85em;
-  }
-
-  .weather-icon {
-    font-size: 2.2em;
-    flex-shrink: 0;
-    line-height: 1;
-  }
-
-  .weather-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .weather-top {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-  }
-
-  .weather-temp {
-    font-size: 1.5em;
-    font-weight: 800;
-    color: #1f2937;
-    line-height: 1;
-  }
-
-  .weather-desc {
-    font-size: 0.85em;
-    color: #6b7280;
-    font-weight: 500;
-  }
-
-  .weather-detail {
-    font-size: 0.75em;
-    color: #9ca3af;
-    display: flex;
-    gap: 10px;
-  }
-
-  .weather-tip {
-    margin-top: 2px;
-    font-size: 0.8em;
-    color: #f97316;
-    font-weight: 500;
-  }
-
-  .weather-city {
-    font-size: 0.75em;
-    color: #9ca3af;
-    text-align: right;
-    flex-shrink: 0;
-  }
-
   /* 移动端 */
   @media (max-width: 380px) {
     .app-icon { width: 50px; height: 50px; font-size: 1.4em; border-radius: 14px; }
     .app-grid { gap: 16px 0; }
-    .date-display .day { font-size: 2.2em; }
-    .weather-card { padding: 14px 16px; gap: 12px; }
-    .weather-temp { font-size: 1.3em; }
+    .info-card { padding: 14px 16px 12px; }
+    .weather-temp { font-size: 1.2em; }
   }
 </style>
 </head>
@@ -279,15 +265,12 @@
   <button class="logout-btn" onclick="doLogout()">退出</button>
 </div>
 
-<!-- 日期 -->
-<div class="date-display">
-  <div class="day" id="dateDay"></div>
-  <div class="weekday" id="dateWeekday"></div>
-</div>
-
-<!-- 天气卡片 -->
-<div class="weather-card loading" id="weatherCard">
-  <span>🌤 获取天气中...</span>
+<!-- 日期+天气 合一卡片 -->
+<div class="info-card">
+  <div class="info-card-date" id="dateLine"></div>
+  <div class="info-card-weather loading" id="weatherCard">
+    <span>🌤 获取天气中...</span>
+  </div>
 </div>
 
 <!-- APP 网格 4x2 -->
@@ -372,8 +355,7 @@ function initPage() {
 
   var now = new Date();
   var weekdays = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
-  document.getElementById('dateDay').textContent = (now.getMonth()+1) + '月' + now.getDate() + '日';
-  document.getElementById('dateWeekday').textContent = weekdays[now.getDay()] + ' · ' + now.getFullYear();
+  document.getElementById('dateLine').textContent = (now.getMonth()+1) + '月' + now.getDate() + '日 ' + weekdays[now.getDay()] + ' · ' + now.getFullYear();
 
   // 加载天气
   loadWeather();
