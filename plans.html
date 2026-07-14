@@ -559,6 +559,7 @@ function confirmAddPlan() {
   savePlans();
   renderPlans();
   hideAddPlan();
+  sendNotify('plan_add', '🗓️', currentUser + ' 添加了周末计划', title, '/plans.html');
 }
 
 function togglePlanDone(id) {
@@ -680,6 +681,18 @@ function savePlans() {
   xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
   xhr.send(JSON.stringify(plans));
 }
+
+function sendNotify(type, icon, title, body, link) {
+  fetch('/api/notifications', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authToken
+    },
+    body: JSON.stringify({ type: type, icon: icon, title: title, body: body, link: link })
+  }).catch(function() {});
+}
+
 </script>
 
 </body>

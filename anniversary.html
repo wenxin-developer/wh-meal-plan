@@ -406,6 +406,18 @@ function saveData() {
   xhr.send(JSON.stringify(anniversaries));
 }
 
+function sendNotify(type, icon, title, body, link) {
+  fetch('/api/notifications', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authToken
+    },
+    body: JSON.stringify({ type: type, icon: icon, title: title, body: body, link: link })
+  }).catch(function() {});
+}
+
+
 function calcDays(dateStr) {
   var d = new Date(dateStr);
   var now = new Date();
@@ -476,6 +488,7 @@ function confirmAdd() {
   saveData();
   render();
   hideAddModal();
+  sendNotify('anniversary_add', '💕', currentUser + ' 添加了纪念日', name, '/anniversary.html');
 }
 
 function deleteAnni(index) {

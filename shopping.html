@@ -345,6 +345,7 @@ function addItem() {
   input.value = '';
   saveItems();
   renderItems();
+  sendNotify('shopping_add', '🛒', currentUser + ' 加了购物清单', text, '/shopping.html');
 }
 
 function toggleItem(id) {
@@ -448,6 +449,18 @@ function saveItems() {
     body: JSON.stringify(items)
   }).catch(function() {});
 }
+
+function sendNotify(type, icon, title, body, link) {
+  fetch('/api/notifications', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authToken
+    },
+    body: JSON.stringify({ type: type, icon: icon, title: title, body: body, link: link })
+  }).catch(function() {});
+}
+
 </script>
 </body>
 </html>

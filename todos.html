@@ -499,6 +499,18 @@ function saveTodos() {
   xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
   xhr.send(JSON.stringify(todos));
 }
+
+function sendNotify(type, icon, title, body, link) {
+  fetch('/api/notifications', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authToken
+    },
+    body: JSON.stringify({ type: type, icon: icon, title: title, body: body, link: link })
+  }).catch(function() {});
+}
+
 </script>
 
 </body>

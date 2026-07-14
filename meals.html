@@ -945,6 +945,18 @@ function saveToServer() {
   xhr.send(JSON.stringify(orderData));
 }
 
+function sendNotify(type, icon, title, body, link) {
+  fetch('/api/notifications', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authToken
+    },
+    body: JSON.stringify({ type: type, icon: icon, title: title, body: body, link: link })
+  }).catch(function() {});
+}
+
+
 function confirmOrder() {
   if (Object.keys(staging).length === 0) {
     alert('请先选择菜品！');
@@ -957,6 +969,15 @@ function confirmOrder() {
   clearSelection();
   renderOrderHistory();
   saveToServer();
+
+  // 生成菜品摘要
+  var dishNames = [];
+  for (var cat in orderData[today]) {
+    for (var i = 0; i < orderData[today][cat].length; i++) {
+      dishNames.push(orderData[today][cat][i]);
+    }
+  }
+  sendNotify('order', '🍽️', currentUser + ' 点了今天的菜', dishNames.slice(0, 3).join('、'), '/meals.html');
 
   alert('已保存！数据已自动同步。');
 }

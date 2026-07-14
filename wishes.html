@@ -410,6 +410,9 @@ function addWish() {
   input.value = '';
   saveWishes();
   renderWishes();
+  if (currentPrivacy === 'public') {
+    sendNotify('wish_add', '⭐', currentUser + ' 许了个愿望', text.slice(0, 30), '/wishes.html');
+  }
 }
 
 function toggleWish(id) {
@@ -540,6 +543,18 @@ function saveWishes() {
     body: JSON.stringify(wishes)
   }).catch(function() {});
 }
+
+function sendNotify(type, icon, title, body, link) {
+  fetch('/api/notifications', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authToken
+    },
+    body: JSON.stringify({ type: type, icon: icon, title: title, body: body, link: link })
+  }).catch(function() {});
+}
+
 </script>
 </body>
 </html>
