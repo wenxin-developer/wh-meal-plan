@@ -509,17 +509,7 @@ function sendNotify(type, icon, title, body, link) {
       'Authorization': 'Bearer ' + authToken
     },
     body: JSON.stringify({ type: type, icon: icon, title: title, body: body, link: link })
-  })
-  .then(function(r) {
-    if (!r.ok) console.warn('通知发送失败:', r.status, r.statusText);
-    return r.json();
-  })
-  .then(function(data) {
-    if (data.error) console.warn('通知API错误:', data.error);
-  })
-  .catch(function(e) {
-    console.warn('通知请求异常:', e.message);
-  });
+  }).catch(function() {});
 }
 
 </script>
