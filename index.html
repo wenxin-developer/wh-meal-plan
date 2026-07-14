@@ -39,6 +39,12 @@
     gap: 12px;
   }
 
+  .top-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
   .avatar {
     width: 42px;
     height: 42px;
@@ -518,11 +524,13 @@
       <span class="greeting-name" id="greetingName"></span>
     </div>
   </div>
-  <button class="notif-btn" id="notifBtn" onclick="toggleNotifPanel()">
-    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
-  </button>
-  <button class="logout-btn" onclick="doLogout()">退出</button>
+  <div class="top-right">
+    <button class="notif-btn" id="notifBtn" onclick="toggleNotifPanel()">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+    </button>
+    <button class="logout-btn" onclick="doLogout()">退出</button>
+  </div>
 </div>
 
 <!-- 通知面板 -->
@@ -819,6 +827,20 @@ function showWeatherError(msg) {
 var notifList = [];
 var notifPanelOpen = false;
 
+function getCurrentUsername() {
+  var token = localStorage.getItem('wh_token');
+  if (!token) return '';
+  try {
+    var decoded = decodeURIComponent(escape(atob(token)));
+    return decoded.split(':')[0] || '';
+  } catch(e) { return ''; }
+}
+
+function isNotifRead(n) {
+  var user = getCurrentUsername();
+  return (n.readBy || []).indexOf(user) !== -1;
+}
+
 function loadNotifications() {
   var token = localStorage.getItem('wh_token');
   if (!token) return;
@@ -837,7 +859,7 @@ function loadNotifications() {
 function updateNotifBadge() {
   var btn = document.getElementById('notifBtn');
   var badge = document.getElementById('notifBadge');
-  var unread = notifList.filter(function(n) { return !n.read; }).length;
+  var unread = notifList.filter(function(n) { return !isNotifRead(n); }).length;
 
   if (unread > 0) {
     btn.classList.add('has-unread');
@@ -883,7 +905,7 @@ function renderNotifPanel() {
 
   var html = '';
   notifList.forEach(function(n) {
-    var readClass = n.read ? 'read' : 'unread';
+    var readClass = isNotifRead(n) ? 'read' : 'unread';
     var timeStr = formatNotifTime(n.createdAt);
     html += '<div class="notif-item ' + readClass + '" data-id="' + n.id + '" onclick="onNotifClick(this, \'' + n.id + '\', \'' + (n.link || '') + '\')">' +
       '<span class="notif-item-icon">' + (n.icon || '📌') + '</span>' +
@@ -902,8 +924,9 @@ function renderNotifPanel() {
 function onNotifClick(el, id, link) {
   // 标记已读
   var item = notifList.find(function(n) { return n.id === id; });
-  if (item && !item.read) {
-    item.read = true;
+  if (item && !isNotifRead(item)) {
+    if (!item.readBy) item.readBy = [];
+    item.readBy.push(getCurrentUsername());
     el.classList.remove('unread');
     el.classList.add('read');
     updateNotifBadge();
@@ -943,7 +966,11 @@ function dismissNotif(id, btnEl) {
 }
 
 function markAllRead() {
-  notifList.forEach(function(n) { n.read = true; });
+  var user = getCurrentUsername();
+  notifList.forEach(function(n) {
+    if (!n.readBy) n.readBy = [];
+    if (n.readBy.indexOf(user) === -1) n.readBy.push(user);
+  });
   updateNotifBadge();
   renderNotifPanel();
 

@@ -1,4 +1,4 @@
-// 消息中心 API — Cloudflare KV
+// 消息中心 API — Cloudflare KV (per-user read status)
 export async function onRequest(context) {
   const { request, env } = context;
   const kv = env.wh_orders;
@@ -13,7 +13,8 @@ export async function onRequest(context) {
     return new Response(null, { headers: corsHeaders, status: 204 });
   }
 
-  if (!checkAuth(request)) {
+  const username = getUsername(request);
+  if (!username) {
     return new Response(JSON.stringify({ error: '未登录' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 401
@@ -27,11 +28,22 @@ export async function onRequest(context) {
     });
   }
 
-  // GET — 获取通知列表
+  // GET — 获取通知列表 (filtered for current user)
   if (request.method === 'GET') {
     try {
-      const data = await kv.get('notifications') || '[]';
-      return new Response(data, {
+      const list = JSON.parse(await kv.get('notifications') || '[]');
+
+      // 清理超过 7 天的
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      const cleaned = list.filter(n => Date.now() - n.createdAt < sevenDays);
+      if (cleaned.length !== list.length) {
+        await kv.put('notifications', JSON.stringify(cleaned));
+      }
+
+      // 过滤掉当前用户已删除的通知
+      const visible = cleaned.filter(n => !(n.dismissedBy || []).includes(username));
+
+      return new Response(JSON.stringify(visible), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     } catch (e) {
@@ -55,7 +67,8 @@ export async function onRequest(context) {
         title: body.title || '',
         body: body.body || '',
         link: body.link || '',
-        read: false,
+        readBy: [],
+        dismissedBy: [],
         createdAt: Date.now()
       };
 
@@ -76,30 +89,35 @@ export async function onRequest(context) {
     }
   }
 
-  // PUT — 标记已读（单条或全部）
+  // PUT — 标记已读/删除 (per-user)
   if (request.method === 'PUT') {
     try {
       const body = await request.json();
       const list = JSON.parse(await kv.get('notifications') || '[]');
 
       if (body.readAll) {
-        // 全部已读
-        list.forEach(n => n.read = true);
+        // 全部已读 — 只标记当前用户
+        list.forEach(n => {
+          if (!n.readBy) n.readBy = [];
+          if (!n.readBy.includes(username)) n.readBy.push(username);
+        });
       } else if (body.id) {
         // 单条已读
         const item = list.find(n => n.id === body.id);
-        if (item) item.read = true;
+        if (item) {
+          if (!item.readBy) item.readBy = [];
+          if (!item.readBy.includes(username)) item.readBy.push(username);
+        }
       } else if (body.dismissId) {
-        // 单条删除
-        const idx = list.findIndex(n => n.id === body.dismissId);
-        if (idx !== -1) list.splice(idx, 1);
+        // 单条删除 — 只标记当前用户已删除
+        const item = list.find(n => n.id === body.dismissId);
+        if (item) {
+          if (!item.dismissedBy) item.dismissedBy = [];
+          if (!item.dismissedBy.includes(username)) item.dismissedBy.push(username);
+        }
       }
 
-      // 清理超过 7 天的
-      const sevenDays = 7 * 24 * 60 * 60 * 1000;
-      const cleaned = list.filter(n => Date.now() - n.createdAt < sevenDays);
-
-      await kv.put('notifications', JSON.stringify(cleaned));
+      await kv.put('notifications', JSON.stringify(list));
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -115,15 +133,15 @@ export async function onRequest(context) {
   return new Response('Not Found', { headers: corsHeaders, status: 404 });
 }
 
-function checkAuth(request) {
+function getUsername(request) {
   const authHeader = request.headers.get('Authorization') || '';
   const token = authHeader.replace('Bearer ', '');
-  if (!token) return false;
+  if (!token) return null;
   try {
     const decoded = decodeURIComponent(escape(atob(token)));
     const parts = decoded.split(':');
-    return parts.length >= 3 && parts[0] && parts[1];
+    return parts.length >= 3 && parts[0] ? parts[0] : null;
   } catch(e) {
-    return false;
+    return null;
   }
 }
