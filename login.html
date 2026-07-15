@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>我们的小日子</title>
+<title>WH的小日子</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -15,35 +15,91 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* 浮动装饰元素 */
+  .deco {
+    position: fixed;
+    border-radius: 50%;
+    opacity: 0.12;
+    pointer-events: none;
+    animation: floatUp 8s ease-in-out infinite;
+  }
+
+  .deco-1 { width: 120px; height: 120px; background: #f97316; top: 10%; left: -30px; animation-delay: 0s; }
+  .deco-2 { width: 80px; height: 80px; background: #ec4899; top: 60%; right: -20px; animation-delay: 2s; }
+  .deco-3 { width: 60px; height: 60px; background: #8b5cf6; bottom: 15%; left: 10%; animation-delay: 4s; }
+  .deco-4 { width: 100px; height: 100px; background: #06b6d4; top: 5%; right: 15%; animation-delay: 1s; }
+  .deco-5 { width: 40px; height: 40px; background: #f59e0b; bottom: 30%; right: 25%; animation-delay: 3s; }
+
+  @keyframes floatUp {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
   }
 
   .login-card {
-    background: #fff;
-    border-radius: 20px;
-    padding: 40px 32px 36px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 28px;
+    padding: 44px 32px 36px;
     width: 100%;
     max-width: 380px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+    box-shadow: 0 12px 48px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.04);
     text-align: center;
+    position: relative;
+    z-index: 1;
   }
 
-  .login-logo {
-    font-size: 3em;
-    margin-bottom: 8px;
+  /* Logo 区域 */
+  .logo-area {
+    margin-bottom: 20px;
+  }
+
+  .logo-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f97316 0%, #ec4899 50%, #8b5cf6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    box-shadow: 0 6px 24px rgba(236,72,153,0.3);
+    position: relative;
+  }
+
+  .logo-circle::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba(236,72,153,0.15);
+  }
+
+  .logo-text {
+    font-size: 1.8em;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 
   .login-title {
     font-size: 1.5em;
-    color: #37474f;
-    font-weight: 700;
+    color: #1f2937;
+    font-weight: 800;
     letter-spacing: 1px;
     margin-bottom: 4px;
   }
 
   .login-subtitle {
-    font-size: 0.9em;
-    color: #90a4ae;
+    font-size: 0.88em;
+    color: #9ca3af;
     margin-bottom: 32px;
+    font-weight: 400;
   }
 
   .form-group {
@@ -53,8 +109,8 @@
 
   .form-group label {
     display: block;
-    font-size: 0.88em;
-    color: #546e7a;
+    font-size: 0.85em;
+    color: #6b7280;
     font-weight: 500;
     margin-bottom: 6px;
     padding-left: 4px;
@@ -62,35 +118,35 @@
 
   .form-group input {
     width: 100%;
-    padding: 12px 16px;
-    border: 1.5px solid #e0e0e0;
-    border-radius: 12px;
+    padding: 13px 16px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
     font-size: 1em;
     outline: none;
-    background: #fafafa;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #f9fafb;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     -webkit-appearance: none;
   }
 
   .form-group input:focus {
-    border-color: #6c5ce7;
-    box-shadow: 0 0 0 3px rgba(108,92,231,0.1);
+    border-color: #ec4899;
+    box-shadow: 0 0 0 3px rgba(236,72,153,0.1);
     background: #fff;
   }
 
   .login-btn {
     width: 100%;
-    padding: 13px;
-    background: linear-gradient(135deg, #6c5ce7, #0984e3);
+    padding: 14px;
+    background: linear-gradient(135deg, #f97316, #ec4899);
     color: #fff;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     font-size: 1.05em;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    margin-top: 8px;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 16px rgba(108,92,231,0.3);
+    margin-top: 10px;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 16px rgba(236,72,153,0.3);
     transition: transform 0.2s, box-shadow 0.2s;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -98,7 +154,7 @@
 
   .login-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(108,92,231,0.4);
+    box-shadow: 0 6px 24px rgba(236,72,153,0.4);
   }
 
   .login-btn:active {
@@ -112,7 +168,7 @@
   }
 
   .error-msg {
-    color: #e53935;
+    color: #ef4444;
     font-size: 0.85em;
     margin-top: 12px;
     display: none;
@@ -124,17 +180,39 @@
 
   .footer-text {
     margin-top: 28px;
-    font-size: 0.8em;
-    color: #b0bec5;
+    font-size: 0.78em;
+    color: #d1d5db;
+    letter-spacing: 0.5px;
+  }
+
+  .footer-text span {
+    display: inline-block;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
   }
 </style>
 </head>
 <body>
 
+<!-- 浮动装饰 -->
+<div class="deco deco-1"></div>
+<div class="deco deco-2"></div>
+<div class="deco deco-3"></div>
+<div class="deco deco-4"></div>
+<div class="deco deco-5"></div>
+
 <div class="login-card">
-  <div class="login-logo">🏡</div>
-  <div class="login-title">我们的小日子</div>
-  <div class="login-subtitle">记录生活的每一天</div>
+  <div class="logo-area">
+    <div class="logo-circle">
+      <span class="logo-text">WH</span>
+    </div>
+    <div class="login-title">WH的小日子</div>
+    <div class="login-subtitle">记录生活的每一天</div>
+  </div>
 
   <form id="loginForm" onsubmit="doLogin(event)">
     <div class="form-group">
@@ -149,7 +227,7 @@
     <div class="error-msg" id="errorMsg"></div>
   </form>
 
-  <div class="footer-text">让每一天都有期待 🌿</div>
+  <div class="footer-text"><span>让每一天都有期待 🌿</span></div>
 </div>
 
 <script>
