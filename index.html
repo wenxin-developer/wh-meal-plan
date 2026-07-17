@@ -629,7 +629,23 @@ var currentRole = null;
     window.location.href = '/login.html';
     return;
   }
-  initPage();
+  // 验证用户是否仍存在于系统中
+  fetch('/api/verify', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(res) {
+    if (!res.valid) {
+      localStorage.removeItem('wh_token');
+      window.location.href = '/login.html';
+      return;
+    }
+    initPage();
+  })
+  .catch(function() {
+    // 网络异常时放行，避免断网时无法使用
+    initPage();
+  });
 })();
 
 function initPage() {
